@@ -65,3 +65,8 @@ enum PinMode{
     INPUT_PU,
     INPUT_PD
 };
+
+enum Device{
+    INTERNAL,
+    EXPANDER
+};

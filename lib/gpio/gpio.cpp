@@ -3,10 +3,12 @@
 #include "PinNames.h"
 #include "i2c.h"
 
+
 gpio::gpio(PinName _pin, PinMode _mode) {
     pin = _pin;
     mode = _mode;
     if (pin < E00) {
+        device=INTERNAL;
         switch (_mode) {
             case INPUT_PU:
                 gpio_set_direction((gpio_num_t)pin, GPIO_MODE_INPUT);
@@ -21,6 +23,7 @@ gpio::gpio(PinName _pin, PinMode _mode) {
                 break;
         }
     } else {
+        device=EXPANDER;
     }
 }
 

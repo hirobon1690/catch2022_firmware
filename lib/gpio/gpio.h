@@ -15,5 +15,6 @@ class gpio{
     private:
         PinName pin;
         PinMode mode;
+        Device device;
         bool state=0;
 };
