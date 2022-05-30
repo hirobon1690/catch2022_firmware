@@ -1,10 +1,10 @@
 #include <driver/i2c.h>
 #include "i2c.h"
 
-void i2c::init() {
+void i2c::init(int scl,int sda) {
     i2c_config_t conf;
-    const int I2C_MASTER_SCL_IO = 22;        /*!< GPIO number used for I2C master clock */
-    const int I2C_MASTER_SDA_IO = 21;        /*!< GPIO number used for I2C master data  */
+    const int I2C_MASTER_SCL_IO = scl;        /*!< GPIO number used for I2C master clock */
+    const int I2C_MASTER_SDA_IO = sda;        /*!< GPIO number used for I2C master data  */
     const int I2C_MASTER_NUM = 0;            /*!< I2C master i2c port number, the number of i2c peripheral interfaces available will depend on the chip */
     const int I2C_MASTER_FREQ_HZ = 400000;   /*!< I2C master clock frequency */
     const int I2C_MASTER_TX_BUF_DISABLE = 0; /*!< I2C master doesn't need buffer */
@@ -35,7 +35,6 @@ void i2c::read(uint8_t addr,uint8_t* data, size_t size){
     i2c_master_start(cmd);
     i2c_master_write_byte(cmd, addr << 1 | I2C_MASTER_READ, I2C_MASTER_ACK);
     i2c_master_read(cmd,data,size,I2C_MASTER_ACK);
-    // i2c_master_read(cmd,data,1,I2C_MASTER_NACK);
     i2c_master_stop(cmd);
     i2c_master_cmd_begin(i2c_master_port, cmd, 1/portTICK_RATE_MS);
     i2c_cmd_link_delete(cmd);
