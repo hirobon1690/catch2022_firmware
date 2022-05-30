@@ -20,13 +20,19 @@ void app_main() {
     uint8_t data1[] = {0x00};
     uint8_t data[] = {0x02, 0x00, 0x00};
     uint8_t data3[] = {0x02, 0xFF, 0xFF};
-    uint8_t out[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    uint8_t out[2] = {0, 0};
     i2c.init();
     i2c.write(0x20, data1, sizeof(data1));
     while (1) {
         i2c.write(0x20, data1, 1);
-        i2c.read(0x20, out, 8);
+        i2c.read(0x20, out, 2);
+        uint16_t out1=out[1]<<8|out[0];
+        bool port[16]={0};
+        for(int i=0;i<16;i++){
+            port[i]=(out1>>i)&0b0000000000000001;
+        }
         delay_ms(500);
-        printf("%d, %d, %d, %d, %d, %d, %d, %d\n", out[0], out[1], out[2], out[3], out[4], out[5], out[6], out[7]);
+        printf("%d, %d, %d, %d, %d, %d, %d, %d\n", port[0],port[1],port[2],port[3],port[4],port[5],port[6],port[7]);
+        printf("%d, %d, %d, %d, %d, %d, %d, %d\n\n", port[8],port[9],port[10],port[11],port[12],port[13],port[14],port[15]);
     }
 }

@@ -33,8 +33,7 @@ void i2c::write(uint8_t addr, uint8_t* data,size_t size) {
 void i2c::read(uint8_t addr,uint8_t* data, size_t size){
     i2c_cmd_handle_t cmd = i2c_cmd_link_create();
     i2c_master_start(cmd);
-    i2c_master_write_byte(cmd, addr << 1 | I2C_MASTER_WRITE, I2C_MASTER_ACK);
-    i2c_master_write_byte(cmd, 0x00, I2C_MASTER_ACK);
+    i2c_master_write_byte(cmd, addr << 1 | I2C_MASTER_READ, I2C_MASTER_ACK);
     i2c_master_read(cmd,data,size,I2C_MASTER_ACK);
     // i2c_master_read(cmd,data,1,I2C_MASTER_NACK);
     i2c_master_stop(cmd);
