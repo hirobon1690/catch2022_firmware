@@ -1,7 +1,9 @@
 #include <driver/i2c.h>
 #include "i2c.h"
 
-void i2c::init(int scl,int sda) {
+_i2c i2c;
+
+void _i2c::init(int scl,int sda) {
     i2c_config_t conf;
     const int I2C_MASTER_SCL_IO = scl;        /*!< GPIO number used for I2C master clock */
     const int I2C_MASTER_SDA_IO = sda;        /*!< GPIO number used for I2C master data  */
@@ -20,7 +22,7 @@ void i2c::init(int scl,int sda) {
     i2c_driver_install(i2c_master_port, conf.mode, I2C_MASTER_RX_BUF_DISABLE, I2C_MASTER_TX_BUF_DISABLE, 0);
 }
 
-void i2c::write(uint8_t addr, uint8_t* data,size_t size) {
+void _i2c::write(uint8_t addr, uint8_t* data,size_t size) {
     i2c_cmd_handle_t cmd = i2c_cmd_link_create();
     i2c_master_start(cmd);
     i2c_master_write_byte(cmd, addr << 1 | I2C_MASTER_WRITE, I2C_MASTER_ACK);
@@ -30,7 +32,17 @@ void i2c::write(uint8_t addr, uint8_t* data,size_t size) {
     i2c_cmd_link_delete(cmd);
 }
 
-void i2c::read(uint8_t addr,uint8_t* data, size_t size){
+void _i2c::write(uint8_t addr, uint8_t data) {
+    i2c_cmd_handle_t cmd = i2c_cmd_link_create();
+    i2c_master_start(cmd);
+    i2c_master_write_byte(cmd, addr << 1 | I2C_MASTER_WRITE, I2C_MASTER_ACK);
+    i2c_master_write_byte(cmd,data, I2C_MASTER_ACK);
+    i2c_master_stop(cmd);
+    i2c_master_cmd_begin(i2c_master_port, cmd, 1/portTICK_RATE_MS);
+    i2c_cmd_link_delete(cmd);
+}
+
+void _i2c::read(uint8_t addr,uint8_t* data, size_t size){
     i2c_cmd_handle_t cmd = i2c_cmd_link_create();
     i2c_master_start(cmd);
     i2c_master_write_byte(cmd, addr << 1 | I2C_MASTER_READ, I2C_MASTER_ACK);

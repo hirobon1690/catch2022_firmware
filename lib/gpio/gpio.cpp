@@ -9,7 +9,7 @@ gpio::gpio(PinName _pin, PinMode _mode) {
     mode = _mode;
     if (pin < E00) {
         device=INTERNAL;
-        switch (_mode) {
+        switch (mode) {
             case INPUT_PU:
                 gpio_set_direction((gpio_num_t)pin, GPIO_MODE_INPUT);
                 gpio_set_pull_mode((gpio_num_t)pin, GPIO_PULLUP_ONLY);
@@ -24,6 +24,8 @@ gpio::gpio(PinName _pin, PinMode _mode) {
         }
     } else {
         device=EXPANDER;
+        pin=(PinName)((int)pin-40);
+        
     }
 }
 

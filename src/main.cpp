@@ -10,7 +10,6 @@
 
 gpio LED(P25,OUTPUT);
 
-// typedef gpio_num_t PinName;
 extern "C" {
 void app_main(void);
 }
