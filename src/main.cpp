@@ -18,7 +18,7 @@ extern "C" {
 }
 
 void delay_ms(int ms) {
-    vTaskDelay(ms / portTICK_RATE_MS);
+    vTaskDelay((TickType_t)ms / portTICK_RATE_MS);
 }
 
 void app_main() {
@@ -31,7 +31,7 @@ void app_main() {
     while (1) {
         pwm1.write(1);
         delay_ms(1);
-        // pwm1.write(0);
-        // delay_ms(1);
+        pwm1.write(0);
+        delay_ms(1);
     }
 }
