@@ -10,10 +10,10 @@ class gpioex{
 
     private:
         const uint8_t ADDR = 0x19;
-        uint16_t input = 0x0000;
-        uint16_t output = 0x0000;
-        uint16_t config = 0x0000;    //リトルエンディアン
-        uint16_t pullState = 0xFFFF;
+        uint8_t input = 0x00;
+        uint8_t output = 0x00;
+        uint8_t config = 0x00;    //リトルエンディアン
+        // uint8_t pullState = 0xFF;
 };
 
 extern gpioex ex;

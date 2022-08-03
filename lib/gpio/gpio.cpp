@@ -1,7 +1,8 @@
 #include "gpio.h"
 #include <driver/gpio.h>
 #include "PinNames.h"
-#include "gpioex.h"
+// #include "gpioex.h"
+#include "pca9557.h"
 #include "i2c.h"
 
 gpio::gpio(PinName _pin, PinMode _mode) {

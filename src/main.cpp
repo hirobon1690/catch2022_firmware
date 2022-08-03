@@ -8,15 +8,15 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "gpio.h"
-#include "gpioex.h"
 #include "i2c.h"
+#include "pca9557.h"
 
 extern "C" {
 void app_main(void);
 }
 
-gpio dir0(E12, OUTPUT);
-gpio dir1(E11, OUTPUT);
+gpio dir0(E04, OUTPUT);
+gpio dir1(E01, OUTPUT);
 
 void delay_ms(int ms) {
     ets_delay_us(ms * 1000);
@@ -28,7 +28,7 @@ void app_main() {
     ex.set();
     dir0.write(1);
     dir1.write(0);
-    mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM0A, (int)P25);
+    mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM0A, (int)P14);
     mcpwm_config_t pwmconfig;
     pwmconfig.frequency = 100000;
     pwmconfig.cmpr_a = 0;  // duty cycle of PWMxA = 0
