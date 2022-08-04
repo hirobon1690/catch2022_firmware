@@ -63,7 +63,8 @@ enum PinName{
 enum PinMode{
     OUTPUT,
     INPUT_PU,
-    INPUT_PD
+    INPUT_PD,
+    INPUT
 };
 
 enum Device{
