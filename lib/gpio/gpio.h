@@ -5,6 +5,7 @@
 class gpio{
     public:
         gpio(PinName _pin,PinMode _mode);
+        gpio();
         void write(bool val);
         bool read();
         void flip();

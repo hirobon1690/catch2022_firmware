@@ -11,6 +11,8 @@
 #include "gpio.h"
 #include "i2c.h"
 #include "pca9557.h"
+#include "ads1015.h"
+#include "tof.h"
 
 extern "C" {
 void app_main(void);
