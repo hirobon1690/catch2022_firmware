@@ -27,6 +27,18 @@ gpio pmp0(E06,OUTPUT);
 gpio pmp1(E01,OUTPUT);
 gpio vlv0(E02,OUTPUT);
 
+Ticker ticker;
+int stepCnt=0;
+int stepCycle=20;
+void step(){
+    if(stepCnt>=stepCycle){
+        stepCnt=0;
+    }else{
+        stepCnt+=50;
+    }
+    stp=(stepCycle!=0&&stepCnt<100);
+}
+
 void delay_ms(int ms) {
     vTaskDelay(ms/portTICK_RATE_MS);
 }
@@ -40,6 +52,7 @@ void app_main() {
     slp.write(1);
     dir.write(0);
     stp.write(0);
+    ticker.attach_us(50,step);
     vlv0.write(1);
     pmp0.write(1);
     pmp1.write(1);
