@@ -13,6 +13,8 @@
 #include "pca9557.h"
 #include "Ticker.h"
 #include "stepper.h"
+#include "ads1015.h"
+#include "tof.h"
 
 extern "C" {
 void app_main(void);
@@ -26,7 +28,7 @@ gpio pmp1(E01,OUTPUT);
 gpio vlv0(E02,OUTPUT);
 
 void delay_ms(int ms) {
-    vTaskDelay(ms/portTICK_PERIOD_MS);
+    vTaskDelay(ms/portTICK_RATE_MS);
 }
 
 
