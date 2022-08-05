@@ -11,6 +11,8 @@
 #include "gpio.h"
 #include "i2c.h"
 #include "pca9557.h"
+#include "Ticker.h"
+#include "stepper.h"
 
 extern "C" {
 void app_main(void);
