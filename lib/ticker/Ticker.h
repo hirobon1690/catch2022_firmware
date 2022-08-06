@@ -44,7 +44,7 @@ class Ticker {
         _attach_ms(milliseconds, true, reinterpret_cast<callback_with_arg_t>(callback), 0);
     }
     void attach_us(uint32_t microseconds, callback_t callback) {
-        _attach_ms(microseconds, true, reinterpret_cast<callback_with_arg_t>(callback), 0);
+        _attach_us(microseconds, true, reinterpret_cast<callback_with_arg_t>(callback), 0);
     }
     template <typename TArg>
     void attach(float seconds, void (*callback)(TArg), TArg arg) {
