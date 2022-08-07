@@ -6,12 +6,13 @@
 #include <rom/ets_sys.h>
 #include <stdio.h>
 #include "PinNames.h"
+#include "ads1015.h"
+#include "driver/twai.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "gpio.h"
 #include "i2c.h"
 #include "pca9557.h"
-#include "ads1015.h"
 #include "tof.h"
 
 extern "C" {
@@ -22,18 +23,41 @@ gpio dir0(E04, OUTPUT);
 gpio dir1(E01, OUTPUT);
 
 void delay_ms(int ms) {
-    vTaskDelay(ms/portTICK_RATE_MS);
+    vTaskDelay(ms / portTICK_RATE_MS);
 }
-
-
 
 void app_main() {
     delay_ms(10);
     i2c.init();
     ex.set();
-    
     printf("init\n");
-    while (1) {
-        
+
+    // Initialize configuration structures using macro initializers
+    twai_general_config_t g_config = TWAI_GENERAL_CONFIG_DEFAULT(GPIO_NUM_21, GPIO_NUM_22, TWAI_MODE_NORMAL);
+    twai_timing_config_t t_config = TWAI_TIMING_CONFIG_500KBITS();
+    twai_filter_config_t f_config = TWAI_FILTER_CONFIG_ACCEPT_ALL();
+    twai_driver_install(&g_config, &t_config, &f_config);
+    twai_start();
+    printf("twai started\n");
+
+    twai_message_t message;
+    message.identifier = 0xAAAA;
+    message.extd = 1;
+    message.data_length_code = 4;
+    for (int i = 0; i < 4; i++) {
+        message.data[i] = 0;
     }
+
+    while (1) {
+        if (twai_transmit(&message, pdMS_TO_TICKS(1000)) == ESP_OK) {
+            printf("Message queued for transmission\n");
+        } else {
+            printf("Failed to queue message for transmission\n");
+        }
+        delay_ms(1000);
+    }
+
+    printf("init\n");
+    // while (1) {
+    // }
 }
