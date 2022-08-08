@@ -6,7 +6,6 @@ enum pins{
     A2=0b110,
     A3=0b111
 };
-
 class adc{
     public:
         adc(pins);
@@ -15,6 +14,6 @@ class adc{
 
     private:
         int pin;
-        uint8_t conf[3]={0b00000001,0b10000010,0b10000011};
-        const int ADDR=0x48;
+        uint8_t conf[3]={0b00000001,0b10000000,0b10000011};
+        const uint8_t ADDR=0x48;
 };

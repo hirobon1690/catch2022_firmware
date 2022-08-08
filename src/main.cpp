@@ -31,9 +31,13 @@ void app_main() {
     delay_ms(10);
     i2c.init();
     ex.set();
-    
+    adc pin0(A0);
+    int result=0;
+
     printf("init\n");
     while (1) {
-        
+        result=pin0.read();
+        printf("%d\n",result);
+        delay_ms(1000);    
     }
 }
