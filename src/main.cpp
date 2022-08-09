@@ -13,11 +13,12 @@
 #include "pca9557.h"
 #include "Ticker.h"
 #include "stepper.h"
+#include "servo.h"
 #include "ads1015.h"
 #include "tof.h"
 
 extern "C" {
-void app_main(void);
+    void app_main(void);
 }
 
 gpio dir(E05, OUTPUT);
@@ -30,6 +31,9 @@ gpio vlv0(E02,OUTPUT);
 Ticker ticker;
 int stepCnt=0;
 int stepCycle=20;
+
+
+
 void step(){
     if(stepCnt>=stepCycle){
         stepCnt=0;
@@ -56,9 +60,15 @@ void app_main() {
     pmp0.write(1);
     pmp1.write(1);
     printf("OK\n");
+    servo servo(P19,0,0);
     while(1){
-        pmp0.write(1);
-        pmp1.write(1);
-        delay_ms(100);
+        for(int angle=0;angle<=180;angle++){
+            servo.write(angle);
+            delay_ms(10);
+        }
+        for(int angle=180;angle>=0;angle--){
+            servo.write(angle);
+            delay_ms(10);
+        }
     }
 }

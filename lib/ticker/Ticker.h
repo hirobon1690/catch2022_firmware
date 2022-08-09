@@ -67,7 +67,7 @@ class Ticker {
     void attach_us(uint32_t microseconds, void (*callback)(TArg), TArg arg) {
         static_assert(sizeof(TArg) <= sizeof(uint32_t), "attach_us() callback argument size must be <= 4 bytes");
         uint32_t arg32 = (uint32_t)arg;
-        _attach_us(microiseconds, true, reinterpret_cast<callback_with_arg_t>(callback), arg32);
+        _attach_us(microseconds, true, reinterpret_cast<callback_with_arg_t>(callback), arg32);
     }
 
     void once(float seconds, callback_t callback) {
