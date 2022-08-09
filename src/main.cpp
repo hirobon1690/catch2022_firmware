@@ -73,7 +73,7 @@ void app_main() {
         uart.read(sample);
         int angle=atoi(sample);
         printf("\nangle is %d\n",angle);
-        servo.duty(angle);
+        servo.write(angle);
         delay_ms(10);
         // for(int angle=0;angle<=180;angle++){
         //     servo.write(angle);
