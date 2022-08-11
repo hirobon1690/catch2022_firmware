@@ -17,6 +17,12 @@ void _uart::init() {
     uart_set_pin(UART_NUM_0, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
 }
 
+void _uart::enableIsr(void (*fn)(void *)) {
+    uart_isr_free(UART_NUM_0);
+    uart_isr_register(UART_NUM_0, fn, NULL, ESP_INTR_FLAG_IRAM, &handle_console);
+    uart_enable_rx_intr(UART_NUM_0);
+}
+
 void _uart::write(char* val) {
     uart_write_bytes(UART_NUM_0, (const char*)val, strlen(val));
 }
@@ -25,8 +31,8 @@ void _uart::read(char* val) {
     int index = 0;
     while (1) {
         uart_read_bytes(UART_NUM_0, val + index, 1, 1000000);
-        if (*(val+index) == '\n') {
-            *(val+index) =NULL;
+        if (*(val + index) == '\n') {
+            *(val + index) = NULL;
             return;
         }
         index++;

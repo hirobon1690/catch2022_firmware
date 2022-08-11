@@ -6,6 +6,7 @@
 #include <esp32/rom/ets_sys.h>
 #include <rom/ets_sys.h>
 #include <stdio.h>
+#include <string.h>
 #include "PinNames.h"
 #include "Ticker.h"
 #include "ads1015.h"
@@ -18,7 +19,6 @@
 #include "stepper.h"
 #include "tof.h"
 #include "uart.h"
-#include <string.h>
 
 extern "C" {
 void app_main(void);
@@ -33,7 +33,22 @@ gpio vlv0(E02, OUTPUT);
 
 Ticker ticker;
 int stepCnt = 0;
-int stepCycle = 20;
+int stepCycle = 1200;
+
+char prevbuf[128];
+char buf[128];
+
+void IRAM_ATTR uartIsr(void *arg) {
+    int index = 0;
+    uart_read_bytes(UART_NUM_0, buf + index, 1, 10);
+    if (*(buf + index) == '\n') {
+        *(buf + index) = NULL;
+        memcpy(prevbuf,buf,sizeof(buf));
+        memset(buf, '\0', sizeof(buf));
+        return;
+    }
+    index++;
+}
 
 void step() {
     if (stepCnt >= stepCycle) {
@@ -41,13 +56,12 @@ void step() {
     } else {
         stepCnt += 50;
     }
-    stp = (stepCycle != 0 && stepCnt < 100);
+    stp.write((stepCycle != 0 && stepCnt < 100));
 }
 
 void delay_ms(int ms) {
     vTaskDelay(ms / portTICK_RATE_MS);
 }
-
 
 void app_main() {
     delay_ms(10);
@@ -56,9 +70,10 @@ void app_main() {
 
     printf("OKOK\n");
     uart.init();
+    uart.enableIsr(uartIsr);
 
     slp.write(1);
-    dir.write(0);
+    dir.write(1);
     stp.write(0);
     ticker.attach_us(50, step);
     vlv0.write(1);
@@ -66,22 +81,16 @@ void app_main() {
     pmp1.write(1);
     printf("OK\n");
     servo servo(P19, 0, 0);
-    int pastangle=0;
+    int pastangle = 0;
     while (1) {
-        char sample[128];
-        printf("Enter Angle\n");
-        uart.read(sample);
-        int angle=atoi(sample);
-        printf("\nangle is %d\n",angle);
-        servo.duty(angle);
+        // stp.flip();
         delay_ms(10);
-        // for(int angle=0;angle<=180;angle++){
-        //     servo.write(angle);
-        //     delay_ms(10);
-        // }
-        // for(int angle=180;angle>=0;angle--){
-        //     servo.write(angle);
-        //     delay_ms(10);
-        // }
+        char sample[128];
+        printf("Enter Stepcycle\n");
+        uart.read(sample);
+        stepCycle = atoi(sample);
+        printf("\nCycle is %d\n", stepCycle);
+        // servo.duty(angle);
+        // delay_ms(10);
     }
 }
