@@ -57,6 +57,11 @@ void step() {
         stepCnt += 50;
     }
     stp.write((stepCycle != 0 && stepCnt < 100));
+    if(stepCycle==0){
+        slp.write(1);
+    }else{
+        slp.write(0);
+    }
 }
 
 void delay_ms(int ms) {
@@ -70,7 +75,7 @@ void app_main() {
 
     printf("OKOK\n");
     uart.init();
-    uart.enableIsr(uartIsr);
+    // uart.enableIsr(uartIsr);
 
     slp.write(1);
     dir.write(1);
