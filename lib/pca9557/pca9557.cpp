@@ -1,6 +1,4 @@
 #include "pca9557.h"
-#include "PinNames.h"
-#include "i2c.h"
 
 gpioex ex;
 
