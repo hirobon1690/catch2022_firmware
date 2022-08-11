@@ -23,6 +23,8 @@ void delay_ms(int ms) {
 }
 
 void app_main() {
+    
+
     delay_ms(10);
     i2c.init();
     ex.set();
