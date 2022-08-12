@@ -19,6 +19,8 @@ void app_main(void);
 
 gpio dir0(E04, OUTPUT);
 gpio dir1(E01, OUTPUT);
+gpio dir2(E02, OUTPUT);
+gpio dir3(E03, OUTPUT);
 
 mcpwm pwm0(P14, MCPWM_UNIT_0, MCPWM0A);
 
@@ -40,26 +42,39 @@ void app_main() {
     ex.set();
     disableCore0WDT();
     uart.init();
-    dir0.write(1);
-    dir1.write(0);
+    // dir0.write(1);
+    // dir1.write(0);
 
-    dir0.write(1);
-    dir1.write(0);
+    dir0.write(0);
+    dir1.write(1);
+    dir2.write(0);
+    dir3.write(0);
 
     printf("init\n");
     int duty = 0;
     while (1) {
-        dir0.write(1);
-        dir1.write(0);
-        pwm0.write(100);
+        // dir0.write(1);
+        // dir1.write(0);
+        // pwm0.write(100);
 
-        // delay_ms(10);
-        // char sample[128];
-        // printf("Enter duty\n");
-        // uart.read(sample);
-        // duty = atoi(sample);
-        // pwm0.write(duty);
-        // printf("Duty is %d\n", duty);
+        delay_ms(10);
+        char sample[128];
+        char dirtext[128];
+        printf("Enter duty\n");
+        uart.read(sample);
+        printf("Enter dir\n");
+        uart.read(dirtext);
+        duty = atoi(sample);
+        bool dir = atoi(dirtext);
+        if (dir) {
+            dir0.write(0);
+            dir1.write(1);
+        } else {
+            dir0.write(1);
+            dir1.write(0);
+        }
+        pwm0.write(duty);
+        printf("Duty is %d\n", duty);
 
         // dir0.write(1);
         // dir1.write(0);
