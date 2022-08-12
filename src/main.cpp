@@ -33,13 +33,27 @@ void app_main() {
     printf("init\n");
 
     // Initialize configuration structures using macro initializers
-    twai_general_config_t g_config = TWAI_GENERAL_CONFIG_DEFAULT(GPIO_NUM_21, GPIO_NUM_22, TWAI_MODE_NORMAL);
+    twai_general_config_t g_config = TWAI_GENERAL_CONFIG_DEFAULT(GPIO_NUM_23, GPIO_NUM_25, TWAI_MODE_NORMAL);
     twai_timing_config_t t_config = TWAI_TIMING_CONFIG_500KBITS();
     twai_filter_config_t f_config = TWAI_FILTER_CONFIG_ACCEPT_ALL();
-    twai_driver_install(&g_config, &t_config, &f_config);
-    twai_start();
-    printf("twai started\n");
 
+    // Install TWAI driver
+    if (twai_driver_install(&g_config, &t_config, &f_config) == ESP_OK) {
+        printf("Driver installed\n");
+    } else {
+        printf("Failed to install driver\n");
+        return;
+    }
+
+    // Start TWAI driver
+    if (twai_start() == ESP_OK) {
+        printf("Driver started\n");
+    } else {
+        printf("Failed to start driver\n");
+        return;
+    }
+
+    // Configure message to transmit
     twai_message_t message;
     message.identifier = 0xAAAA;
     message.extd = 1;
@@ -49,6 +63,7 @@ void app_main() {
     }
 
     while (1) {
+        // Queue message for transmission
         if (twai_transmit(&message, pdMS_TO_TICKS(1000)) == ESP_OK) {
             printf("Message queued for transmission\n");
         } else {
@@ -57,7 +72,6 @@ void app_main() {
         delay_ms(1000);
     }
 
-    printf("init\n");
     // while (1) {
     // }
 }

@@ -2,6 +2,7 @@
     "files.associations": {
         "*.ipp": "cpp",
         "thread": "cpp",
-        "*.tcc": "cpp"
+        "*.tcc": "cpp",
+        "system_error": "cpp"
     }
 }
