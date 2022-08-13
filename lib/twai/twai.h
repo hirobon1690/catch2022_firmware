@@ -6,6 +6,7 @@ class _twai {
     _twai();
     void init();
     void write(unsigned char id, unsigned char* data, size_t size);
+    void write(twai_message_t* msg);
     void read(twai_message_t* msg);
 
    private:
