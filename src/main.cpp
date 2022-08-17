@@ -33,22 +33,22 @@ gpio vlv0(E02, OUTPUT);
 
 Ticker ticker;
 int stepCnt = 0;
-int stepCycle = 1200;
+int stepCycle = 0;
 
 char prevbuf[128];
 char buf[128];
 
-void IRAM_ATTR uartIsr(void *arg) {
-    int index = 0;
-    uart_read_bytes(UART_NUM_0, buf + index, 1, 10);
-    if (*(buf + index) == '\n') {
-        *(buf + index) = NULL;
-        memcpy(prevbuf,buf,sizeof(buf));
-        memset(buf, '\0', sizeof(buf));
-        return;
-    }
-    index++;
-}
+// void IRAM_ATTR uartIsr(void *arg) {
+//     int index = 0;
+//     uart_read_bytes(UART_NUM_0, buf + index, 1, 10);
+//     if (*(buf + index) == '\n') {
+//         *(buf + index) = NULL;
+//         memcpy(prevbuf,buf,sizeof(buf));
+//         memset(buf, '\0', sizeof(buf));
+//         return;
+//     }
+//     index++;
+// }
 
 void step() {
     if (stepCnt >= stepCycle) {
@@ -70,7 +70,7 @@ void app_main() {
 
     printf("OKOK\n");
     uart.init();
-    uart.enableIsr(uartIsr);
+    // uart.enableIsr(uartIsr);
 
     slp.write(1);
     dir.write(1);
@@ -82,6 +82,11 @@ void app_main() {
     printf("OK\n");
     servo servo(P19, 0, 0);
     int pastangle = 0;
+    printf("Enter Dir\n");
+    char direction[128];
+    uart.read(direction);
+    dir.write((bool)atoi(direction));
+    
     while (1) {
         // stp.flip();
         delay_ms(10);
