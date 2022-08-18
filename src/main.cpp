@@ -27,11 +27,12 @@ void app_main(void);
 gpio dir(E05, OUTPUT);
 gpio slp(E04, OUTPUT);
 gpio stp(P18, OUTPUT);
-gpio pmp0(E06, OUTPUT);
-gpio pmp1(E01, OUTPUT);
-gpio vlv0(E02, OUTPUT);
+gpio pmp0(P18, OUTPUT);
+gpio pmp1(P19, OUTPUT);
+gpio vlv0(P27, OUTPUT);
+gpio vlv1(P26,OUTPUT);
 
-Ticker ticker;
+// Ticker ticker;
 int stepCnt = 0;
 int stepCycle = 0;
 
@@ -77,29 +78,56 @@ void app_main() {
     uart.init();
     // uart.enableIsr(uartIsr);
 
-    slp.write(1);
-    dir.write(1);
-    stp.write(0);
-    ticker.attach_us(50, step);
-    vlv0.write(1);
-    pmp0.write(1);
-    pmp1.write(1);
+    // slp.write(1);
+    // dir.write(1);
+    // stp.write(0);
+    // ticker.attach_us(50, step);
+    // vlv0.write(1);
+    // pmp0.write(1);
+    // pmp1.write(1);
     printf("OK\n");
-    servo servo(P19, 0, 0);
-    int pastangle = 0;
-    printf("Enter Dir\n");
-    char direction[128];
-    uart.read(direction);
-    dir.write((bool)atoi(direction));
+    // servo servo(P19, 0, 0);
+    // int pastangle = 0;
+    // printf("Enter Dir\n");
+    // char direction[128];
+    // uart.read(direction);
+    // dir.write((bool)atoi(direction));
     
     while (1) {
         // stp.flip();
         delay_ms(10);
         char sample[128];
-        printf("Enter Stepcycle\n");
+        printf("Enter Pomp State\n");
         uart.read(sample);
-        stepCycle = atoi(sample);
-        printf("\nCycle is %d\n", stepCycle);
+        switch(atoi(sample)){
+            case 0:
+                pmp0.write(1);
+                vlv0.write(0);
+                break;
+            case 1:
+                pmp0.write(1);
+                vlv0.write(1);
+                break;
+            case 2:
+                pmp1.write(1);
+                vlv1.write(0);
+                break;
+            case 3:
+                pmp1.write(1);
+                vlv1.write(1);
+                break;
+            case 4:
+                vlv0.write(0);
+                vlv1.write(0);
+                break;
+            case 5:
+                vlv0.write(1);
+                vlv1.write(1);
+                break;
+
+        }
+        // stepCycle = atoi(sample);
+        // printf("\nCycle is %d\n", stepCycle);
         // servo.duty(angle);
         // delay_ms(10);
     }
