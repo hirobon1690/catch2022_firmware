@@ -68,21 +68,21 @@ void app_main() {
     servo servo(P19, 0, 0);
     int pastangle=0;
     while (1) {
-        // char sample[128];
-        // printf("Enter Angle\n");
-        // uart.read(sample);
-        // int angle=atoi(sample);
-        // printf("\nangle is %d\n",angle);
-        // servo.write(angle);
-        // delay_ms(10);
-
         char sample[128];
-        printf("Enter Duty\n");
+        printf("Enter Angle\n");
         uart.read(sample);
         int angle=atoi(sample);
-        printf("\nduty is %d\n",angle);
-        servo.duty(angle);
+        printf("\nangle is %d\n",angle);
+        servo.write(angle);
         delay_ms(10);
+
+        // char sample[128];
+        // printf("Enter Duty\n");
+        // uart.read(sample);
+        // int angle=atoi(sample);
+        // printf("\nduty is %d\n",angle);
+        // servo.duty(angle);
+        // delay_ms(10);
 
         // for(int angle=0;angle<=180;angle++){
         //     servo.write(angle);
