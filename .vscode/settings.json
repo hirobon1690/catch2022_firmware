@@ -3,6 +3,10 @@
         "*.ipp": "cpp",
         "thread": "cpp",
         "*.tcc": "cpp",
-        "system_error": "cpp"
+        "system_error": "cpp",
+        "array": "cpp",
+        "functional": "cpp",
+        "mutex": "cpp",
+        "tuple": "cpp"
     }
 }
