@@ -23,6 +23,8 @@ void app_main(void);
 gpio dir0(E04, OUTPUT);
 gpio dir1(E01, OUTPUT);
 gpio user(P2, INPUT_PU);
+gpio limit0(Pe2A,INPUT_PU);
+gpio limit1(Pe2B,INPUT_PU);
 
 TaskHandle_t taskHandle;
 volatile SemaphoreHandle_t semaphore;
@@ -35,15 +37,15 @@ int i = 0;
 void IRAM_ATTR gpioIsr(void* arg) {
     i++;
     BaseType_t taskWoken;
-    xSemaphoreGiveFromISR(semaphore,NULL);
+    xTaskNotifyFromISR(taskHandle,0,eNoAction,&taskWoken);
+    // xSemaphoreGiveFromISR(semaphore,NULL);
 }
 
 void isrTask(void* pvParameters) {
     // uint32_t ulNotifiedValue;
-
     while (1) {
-        xSemaphoreTake(semaphore,portMAX_DELAY);
-        // xTaskNotifyWait(0, 0, NULL, portMAX_DELAY);
+        // xSemaphoreTake(semaphore,portMAX_DELAY);
+        xTaskNotifyWait(0, 0, NULL, portMAX_DELAY);
         printf("changed\n");
         delay_ms(100);
     }
@@ -53,10 +55,10 @@ void app_main() {
     i2c.init();
     ex.set();
     gpio_install_isr_service(0);
-    gpio_set_intr_type(GPIO_NUM_2, GPIO_INTR_ANYEDGE);
-    gpio_isr_handler_add(GPIO_NUM_2, gpioIsr, NULL);
+    gpio_set_intr_type((gpio_num_t)Pe2B, GPIO_INTR_ANYEDGE);
+    gpio_isr_handler_add((gpio_num_t)Pe2B, gpioIsr, NULL);
     semaphore=xSemaphoreCreateBinary();
-    xTaskCreatePinnedToCore(isrTask, "isrTask", 4096, NULL, 10, NULL, 0);
+    xTaskCreatePinnedToCore(isrTask, "isrTask", 4096, NULL, 10, &taskHandle, 0);
 
     while (1) {
         // printf("%d\n", i);
@@ -65,6 +67,7 @@ void app_main() {
         // }else{
         //     printf("0\n");
         // }
+        // xTaskNotify(taskHandle,0,eNoAction);
         delay_ms(100);
     }
 }
