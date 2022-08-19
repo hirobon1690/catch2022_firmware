@@ -27,5 +27,16 @@ void delay_ms(int ms) {
 }
 
 void app_main() {
+    i2c.init();
+    ex.set();
+    gpio pin(Pe2C,OUTPUT);
+    tof tof1(pin);
+    // tof tof2(Pe2D);
 
+    while(1){
+        int dist;
+        dist=tof1.read();
+        printf("%d\n",dist);
+        delay_ms(100);
+    }
 }
