@@ -26,12 +26,14 @@ void app_main(void);
 
 gpio dir(E05, OUTPUT);
 gpio slp(E04, OUTPUT);
-gpio stp(P18, OUTPUT);
-gpio pmp0(P4, OUTPUT);
-gpio pmp1(P5, OUTPUT);
-gpio vlv0(P13, OUTPUT);
-gpio vlv1(P12, OUTPUT);
-servo servo(P19, 0, 0);
+
+gpio pmp0(Pe0A, OUTPUT);
+gpio pmp1(Pe0B, OUTPUT);
+gpio vlv0(Pe0D, OUTPUT);
+gpio vlv1(Pe0C, OUTPUT);
+
+gpio stp(Pe2A, OUTPUT);
+servo servo(Pe2B, 0, 0);
 
 Ticker ticker;
 int stepCnt = 0;
