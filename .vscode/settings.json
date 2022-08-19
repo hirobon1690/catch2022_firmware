@@ -3,6 +3,16 @@
         "*.ipp": "cpp",
         "thread": "cpp",
         "*.tcc": "cpp",
-        "system_error": "cpp"
+        "system_error": "cpp",
+        "exception": "cpp",
+        "optional": "cpp",
+        "memory": "cpp",
+        "istream": "cpp",
+        "new": "cpp",
+        "ostream": "cpp",
+        "fstream": "cpp",
+        "iosfwd": "cpp",
+        "sstream": "cpp",
+        "streambuf": "cpp"
     }
 }
