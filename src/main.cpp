@@ -27,9 +27,11 @@ void app_main(void);
 gpio dir(E05, OUTPUT);
 gpio slp(E04, OUTPUT);
 gpio stp(P18, OUTPUT);
-gpio pmp0(E06, OUTPUT);
-gpio pmp1(E01, OUTPUT);
-gpio vlv0(E02, OUTPUT);
+gpio pmp0(P4, OUTPUT);
+gpio pmp1(P5, OUTPUT);
+gpio vlv0(P13, OUTPUT);
+gpio vlv1(P12, OUTPUT);
+servo servo(P19, 0, 0);
 
 Ticker ticker;
 int stepCnt = 0;
@@ -57,11 +59,11 @@ void step() {
         stepCnt += 50;
     }
     stp.write((stepCycle != 0 && stepCnt < 100));
-    if(stepCycle==0){
-        slp.write(1);
-    }else{
-        slp.write(0);
-    }
+    // if(stepCycle==0){
+    //     slp.write(1);
+    // }else{
+    //     slp.write(0);
+    // }
 }
 
 void delay_ms(int ms) {
@@ -73,33 +75,84 @@ void app_main() {
     i2c.init();
     ex.set();
 
-    printf("OKOK\n");
     uart.init();
+    printf("init\n");
     // uart.enableIsr(uartIsr);
 
     slp.write(1);
-    dir.write(1);
-    stp.write(0);
+    // dir.write(1);
+    // stp.write(0);
     ticker.attach_us(50, step);
-    vlv0.write(1);
-    pmp0.write(1);
-    pmp1.write(1);
-    printf("OK\n");
-    servo servo(P19, 0, 0);
-    int pastangle = 0;
-    printf("Enter Dir\n");
-    char direction[128];
-    uart.read(direction);
-    dir.write((bool)atoi(direction));
-    
+    // vlv0.write(1);
+    // pmp0.write(1);
+    // pmp1.write(1);
+    // printf("OK\n");
+    // servo servo(P19, 0, 0);
+    // int pastangle = 0;
+    // printf("Enter Dir\n");
+    // char direction[128];
+    // uart.read(direction);
+    // dir.write((bool)atoi(direction));
+    char sample[128];
+    vlv0.write(0);
+    vlv1.write(0);
+    pmp0.write(0);
+    pmp1.write(0);
     while (1) {
-        // stp.flip();
-        delay_ms(10);
-        char sample[128];
-        printf("Enter Stepcycle\n");
+        printf("Enter to Rotate Servo 90 deg\n");
         uart.read(sample);
-        stepCycle = atoi(sample);
-        printf("\nCycle is %d\n", stepCycle);
+        servo.write(90);
+
+        printf("Enter to Rotate Servo 0 deg\n");
+        uart.read(sample);
+        servo.write(0);
+
+        printf("Enter to move stepper down\n");
+        uart.read(sample);
+        dir.write(1);
+        stepCycle = 5000;
+
+        printf("Enter to stop stepper\n");
+        uart.read(sample);
+        stepCycle = 0;
+
+        printf("Enter to vacuum");
+        vlv0.write(1);
+        vlv1.write(1);
+        pmp0.write(1);
+        pmp1.write(1);
+
+        printf("Enter to move stepper up\n");
+        uart.read(sample);
+        dir.write(0);
+        stepCycle = 4000;
+        vlv0.write(1);
+        vlv1.write(1);
+        pmp0.write(1);
+        pmp1.write(1);
+
+        printf("Enter to stop stepper\n");
+        vlv0.write(1);
+        vlv1.write(1);
+        pmp0.write(1);
+        pmp1.write(1);
+        uart.read(sample);
+        stepCycle = 0;
+
+
+        printf("Enter to stop vacuum\n");
+        uart.read(sample);
+        vlv0.write(0);
+        vlv1.write(0);
+        pmp0.write(0);
+        pmp1.write(0);
+        // stp.flip();
+        // delay_ms(10);
+
+        // printf("Enter Stepcycle\n");
+        // uart.read(sample);
+        // stepCycle = atoi(sample);
+        // printf("\nCycle is %d\n", stepCycle);
         // servo.duty(angle);
         // delay_ms(10);
     }
