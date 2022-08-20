@@ -38,7 +38,5 @@ void app_main() {
         result=pin0.read();
         printf("%d\n",result);
         delay_ms(100);    
-
-
     }
 }
