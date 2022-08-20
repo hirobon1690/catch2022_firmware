@@ -5,8 +5,6 @@
 #include <rom/ets_sys.h>
 #include <stdio.h>
 #include "PinNames.h"
-#include "Ticker.h"
-#include "ads1015.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "gpio.h"
@@ -24,7 +22,7 @@ void app_main(void);
 }
 
 void delay_ms(int ms) {
-    vTaskDelay(ms / portTICK_RATE_MS);
+    vTaskDelay(ms/portTICK_RATE_MS);
 }
 
 void app_main() {
