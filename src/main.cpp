@@ -17,6 +17,7 @@
 #include "stepper.h"
 #include "tof.h"
 #include "uart.h"
+#include "motor.h"
 
 extern "C" {
 void app_main(void);
