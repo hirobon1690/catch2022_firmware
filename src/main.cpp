@@ -12,17 +12,20 @@
 #include "mcpwm.h"
 #include "pca9557.h"
 #include "uart.h"
+#include "motor.h"
 
 extern "C" {
 void app_main(void);
 }
 
-gpio dir0(E04, OUTPUT);
-gpio dir1(E01, OUTPUT);
+// gpio dir0(E04, OUTPUT);
+// gpio dir1(E01, OUTPUT);
 gpio dir2(E02, OUTPUT);
 gpio dir3(E03, OUTPUT);
 
-mcpwm pwm0(P14, MCPWM_UNIT_0, MCPWM0A);
+// mcpwm pwm0(P14, MCPWM_UNIT_0, MCPWM0A);
+
+motor motor0(P14, MCPWM_UNIT_0, MCPWM0A,E04,E01);
 
 void enableCore0WDT() {
     TaskHandle_t idle_0 = xTaskGetIdleTaskHandleForCPU(0);
@@ -45,10 +48,6 @@ void app_main() {
     // dir0.write(1);
     // dir1.write(0);
 
-    dir0.write(0);
-    dir1.write(1);
-    dir2.write(0);
-    dir3.write(0);
 
     printf("init\n");
     int duty = 0;
@@ -62,18 +61,18 @@ void app_main() {
         char dirtext[128];
         printf("Enter duty\n");
         uart.read(sample);
-        printf("Enter dir\n");
-        uart.read(dirtext);
+        // printf("Enter dir\n");
+        // uart.read(dirtext);
         duty = atoi(sample);
-        bool dir = atoi(dirtext);
-        if (dir) {
-            dir0.write(0);
-            dir1.write(1);
-        } else {
-            dir0.write(1);
-            dir1.write(0);
-        }
-        pwm0.write(duty);
+        // bool dir = atoi(dirtext);
+        // if (dir) {
+        //     dir0.write(0);
+        //     dir1.write(1);
+        // } else {
+        //     dir0.write(1);
+        //     dir1.write(0);
+        // }
+        motor0.write(duty);
         printf("Duty is %d\n", duty);
 
         // dir0.write(1);
