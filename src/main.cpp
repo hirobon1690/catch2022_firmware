@@ -26,7 +26,7 @@ void app_main(void);
 gpio dir2(E02, OUTPUT);
 gpio dir3(E03, OUTPUT);
 
-KRA_PID pid(0.01,0,250,0,100);
+KRA_PID pid(0.01,0,250,0,30);
 
 // mcpwm pwm0(P14, MCPWM_UNIT_0, MCPWM0A);
 motor m0(P14, MCPWM_UNIT_0, MCPWM0A, E04, E01);
@@ -54,10 +54,17 @@ void app_main() {
 
     printf("init\n");
     int duty = 0;
-    adc a0(A0);
+    adc a0(A3);
 
     while (1) {
+        printf("%d\n",a0.read());
+        int result=0;
+        for(int i=0;i<100;i++){
+            result+=a0.read();
+        }
+        result/=100;
         
+        delay_ms(100);
 
         // delay_ms(10);
         // char sample[128];
