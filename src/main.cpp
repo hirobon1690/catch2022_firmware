@@ -90,14 +90,15 @@ void app_main() {
     int duty = 0;
     adc a0(A2);
     while (1) {
-        printf("%d\n",a0.read());
-        int result=0;
+        // printf("%d\n",a0.read());
+        float result=0;
         for(int i=0;i<100;i++){
             result+=a0.read();
         }
         result/=100;
-        
-        delay_ms(100);
+        result=-6E-06*result*result-0.1835*result+267.85;
+        m0.write(pid.calPID(result));
+        delay_ms(10);
 
         // delay_ms(10);
         // char sample[128];
