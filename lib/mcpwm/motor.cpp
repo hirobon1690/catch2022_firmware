@@ -4,7 +4,7 @@ motor::motor(PinName pin, mcpwm_unit_t mcpwm_num, mcpwm_timer_t timer_num,mcpwm_
     : dir0(_dir0, OUTPUT), dir1(_dir1, OUTPUT), _mcpwm(pin, mcpwm_num, timer_num,io_signal) {
 }
 
-void motor::write(int duty) {
+void motor::write(float duty) {
     if (duty<0){
         dir0.write(0);
         dir1.write(1);
