@@ -30,7 +30,7 @@ void _uart::write(char* val) {
 void _uart::read(char* val) {
     int index = 0;
     while (1) {
-        uart_read_bytes(UART_NUM_0, val + index, 1, 1000000);
+        uart_read_bytes(UART_NUM_0, val + index, 1, portMAX_DELAY);
         if (*(val + index) == '\n') {
             *(val + index) = NULL;
             return;

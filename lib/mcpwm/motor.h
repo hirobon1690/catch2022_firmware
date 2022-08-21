@@ -9,5 +9,5 @@ class motor {
    private:
     gpio dir0;
     gpio dir1;
-    mcpwm mcpwm;
+    mcpwm _mcpwm;
 };
