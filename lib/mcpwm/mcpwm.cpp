@@ -24,6 +24,6 @@ mcpwm::mcpwm(PinName pin,mcpwm_unit_t mcpwm_num, mcpwm_timer_t timer_num,mcpwm_i
     mcpwm_set_frequency(MCPWM_NUM, TIMER_NUM, 10000);
 }
 
-void mcpwm::write(int duty){
+void mcpwm::write(float duty){
     mcpwm_set_duty(MCPWM_NUM, TIMER_NUM, MCPWM_OPR_A, duty);
 }
