@@ -74,25 +74,25 @@ void isrTask(void* pvParameters) {
 
 int rawData[2]={0,0};
 
-void home(){
-    m0.write(15);
+void home(motor &_motor){
+    _motor.write(15);
     while(1){
         if(!s1.read()){
             break;
         }
         delay_ms(1);
     }
-    m0.write(0);
+    _motor.write(0);
     rawData[0]=pot0.readAvrg(100);
     printf("%d\n",rawData[0]);
-    m0.write(-15);
+    _motor.write(-15);
     while(1){
         if(!s0.read()){
             break;
         }
         delay_ms(1);
     }
-    m0.write(0);
+    _motor.write(0);
     rawData[1]=pot0.readAvrg(100);
     printf("%d\n",rawData[1]);
 }
@@ -103,7 +103,7 @@ void app_main() {
     ex.set();
     // disableCore0WDT();
     uart.init();
-    home();
+    home(m1);
 
     gpio_install_isr_service(0);
     gpio_set_intr_type((gpio_num_t)Pe1C, GPIO_INTR_NEGEDGE);
