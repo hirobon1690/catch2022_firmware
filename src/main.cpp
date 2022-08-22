@@ -32,6 +32,8 @@ gpio user(USER, INPUT_PU);
 motor m0(Pe1A, MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM0A, E04, E01);
 motor m1(Pe1B, MCPWM_UNIT_1, MCPWM_TIMER_1, MCPWM1A, E03, E02);
 
+bool isPressed = 0;
+
 void enableCore0WDT() {
     TaskHandle_t idle_0 = xTaskGetIdleTaskHandleForCPU(0);
 }
@@ -58,7 +60,13 @@ void isrTask(void* pvParameters) {
     while (1) {
         // xSemaphoreTake(semaphore,portMAX_DELAY);
         xTaskNotifyWait(0, 0, NULL, portMAX_DELAY);
-        m0.write(0);
+        if (!isPressed) {
+            m0.write(0);
+            printf("stop\n");
+            isPressed = 1;
+        } else {
+            isPressed = 0;
+        }
         // printf("changed\n");
     }
 }
@@ -107,7 +115,7 @@ void app_main() {
             printf("%d\n", result / 100);
         } else {
             duty = atoi(sample);
-            m1.write(duty);
+            m0.write(duty);
             printf("Duty is %d\n", duty);
         }
 
