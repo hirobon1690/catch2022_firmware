@@ -14,5 +14,6 @@
         "iosfwd": "cpp",
         "sstream": "cpp",
         "streambuf": "cpp"
-    }
+    },
+    "ros.distro": "noetic"
 }
