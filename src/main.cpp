@@ -27,6 +27,7 @@ gpio dir3(E03, OUTPUT);
 gpio s0(Pe1C, INPUT_PU);
 gpio s1(Pe1D, INPUT_PU);
 gpio user(USER, INPUT_PU);
+adc pot0(A2);
 
 // mcpwm pwm0(P14, MCPWM_UNIT_0, MCPWM0A);
 motor m0(Pe1A, MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM0A, E04, E01);
@@ -71,12 +72,38 @@ void isrTask(void* pvParameters) {
     }
 }
 
+int rawData[2]={0,0};
+
+void home(){
+    m0.write(15);
+    while(1){
+        if(!s1.read()){
+            break;
+        }
+        delay_ms(1);
+    }
+    m0.write(0);
+    rawData[0]=pot0.readAvrg(100);
+    printf("%d\n",rawData[0]);
+    m0.write(-15);
+    while(1){
+        if(!s0.read()){
+            break;
+        }
+        delay_ms(1);
+    }
+    m0.write(0);
+    rawData[1]=pot0.readAvrg(100);
+    printf("%d\n",rawData[1]);
+}
+
 void app_main() {
     delay_ms(10);
     i2c.init();
     ex.set();
     // disableCore0WDT();
     uart.init();
+    home();
 
     gpio_install_isr_service(0);
     gpio_set_intr_type((gpio_num_t)Pe1C, GPIO_INTR_NEGEDGE);
@@ -96,7 +123,7 @@ void app_main() {
 
     printf("init\n");
     int duty = 0;
-    adc a0(A2);
+
     while (1) {
         // dir0.write(1);
         // dir1.write(0);
@@ -107,12 +134,7 @@ void app_main() {
         printf("Enter duty\n");
         uart.read(sample);
         if (sample[0] == 'r') {
-            int result = 0;
-            for (int i = 0; i < 100; i++) {
-                result += a0.read();
-                delay_ms(1);
-            }
-            printf("%d\n", result / 100);
+            printf("%d\n", pot0.readAvrg(100));
         } else {
             duty = atoi(sample);
             m0.write(duty);
