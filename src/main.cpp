@@ -61,7 +61,7 @@ void isrTask(void* pvParameters) {
         // xSemaphoreTake(semaphore,portMAX_DELAY);
         xTaskNotifyWait(0, 0, NULL, portMAX_DELAY);
         if (!isPressed) {
-            m0.write(0);
+            m1.write(0);
             printf("stop\n");
             isPressed = 1;
         } else {
@@ -115,7 +115,7 @@ void app_main() {
             printf("%d\n", result / 100);
         } else {
             duty = atoi(sample);
-            m0.write(duty);
+            m1.write(duty);
             printf("Duty is %d\n", duty);
         }
 
