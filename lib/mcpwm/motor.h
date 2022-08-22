@@ -11,4 +11,5 @@ class motor {
     gpio dir0;
     gpio dir1;
     mcpwm _mcpwm;
+    float duty;
 };

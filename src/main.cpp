@@ -66,7 +66,7 @@ void isrTask(void* pvParameters) {
         // xSemaphoreTake(semaphore,portMAX_DELAY);
         xTaskNotifyWait(0, 0, NULL, portMAX_DELAY);
         if (!isPressed) {
-            m0.write(0);
+            m1.write(0);
             printf("stop\n");
             isPressed = 1;
         } else {
@@ -78,10 +78,17 @@ void isrTask(void* pvParameters) {
 
 int rawData[2]={0,0};
 
+float getDeg(int raw){
+    return 250*(float)raw/(rawData[0]-rawData[1])+(float)rawData[1]*250/(rawData[1]-rawData[0]);
+}
+
+
 void home(motor &_motor){
-    _motor.write(15);
+    _motor.write(-15);
+    delay_ms(100);
+    _motor.write(30);
     while(1){
-        if(!s1.read()){
+        if(!user.read()){
             break;
         }
         delay_ms(1);
@@ -89,9 +96,10 @@ void home(motor &_motor){
     _motor.write(0);
     rawData[0]=pot0.readAvrg(100);
     printf("%d\n",rawData[0]);
-    _motor.write(-15);
+    delay_ms(100);
+    _motor.write(-30);
     while(1){
-        if(!s0.read()){
+        if(!user.read()){
             break;
         }
         delay_ms(1);
@@ -99,6 +107,9 @@ void home(motor &_motor){
     _motor.write(0);
     rawData[1]=pot0.readAvrg(100);
     printf("%d\n",rawData[1]);
+    _motor.write(15);
+    delay_ms(100);
+    _motor.write(0);
 }
 
 void app_main() {
@@ -123,16 +134,14 @@ void app_main() {
 
     printf("init\n");
     int duty = 0;
+    m1.write(20);
 
     while (1) {
         // printf("%d\n",a0.read());
         float result=0;
-        for(int i=0;i<100;i++){
-            result+=a0.read();
-        }
-        result/=100;
-        result=-6E-06*result*result-0.1835*result+267.85;
-        m0.write(pid.calPID(result));
+        result=getDeg(pot0.readAvrg(10));
+        printf("%f\n",result);
+        m1.write(pid.calPID(result));
         delay_ms(10);
 
         // delay_ms(10);
