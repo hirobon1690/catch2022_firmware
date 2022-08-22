@@ -17,3 +17,11 @@ int adc::read(){
     i2c.read(ADDR,result,2);
     return (result[0]<<4)|(result[1]>>4);
 }
+
+int adc::readAvrg(int times){
+    int result=0;
+    for(int i=0;i<times;i++){
+        result+=this->read();
+    }
+    return result/times;
+}

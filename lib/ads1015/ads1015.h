@@ -11,6 +11,7 @@ class adc{
         adc(pins);
         void init();
         int read();
+        int readAvrg(int times);
 
     private:
         int pin;

@@ -31,10 +31,13 @@ KRA_PID pid(0.01,0,250,0,30);
 gpio s0(Pe1C, INPUT_PU);
 gpio s1(Pe1D, INPUT_PU);
 gpio user(USER, INPUT_PU);
+adc pot0(A2);
 
 // mcpwm pwm0(P14, MCPWM_UNIT_0, MCPWM0A);
 motor m0(Pe1A, MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM0A, E04, E01);
 motor m1(Pe1B, MCPWM_UNIT_1, MCPWM_TIMER_1, MCPWM1A, E03, E02);
+
+bool isPressed = 0;
 
 void enableCore0WDT() {
     TaskHandle_t idle_0 = xTaskGetIdleTaskHandleForCPU(0);
@@ -62,9 +65,40 @@ void isrTask(void* pvParameters) {
     while (1) {
         // xSemaphoreTake(semaphore,portMAX_DELAY);
         xTaskNotifyWait(0, 0, NULL, portMAX_DELAY);
-        m0.write(0);
+        if (!isPressed) {
+            m0.write(0);
+            printf("stop\n");
+            isPressed = 1;
+        } else {
+            isPressed = 0;
+        }
         // printf("changed\n");
     }
+}
+
+int rawData[2]={0,0};
+
+void home(motor &_motor){
+    _motor.write(15);
+    while(1){
+        if(!s1.read()){
+            break;
+        }
+        delay_ms(1);
+    }
+    _motor.write(0);
+    rawData[0]=pot0.readAvrg(100);
+    printf("%d\n",rawData[0]);
+    _motor.write(-15);
+    while(1){
+        if(!s0.read()){
+            break;
+        }
+        delay_ms(1);
+    }
+    _motor.write(0);
+    rawData[1]=pot0.readAvrg(100);
+    printf("%d\n",rawData[1]);
 }
 
 void app_main() {
@@ -74,6 +108,7 @@ void app_main() {
     ex.set();
     // disableCore0WDT();
     uart.init();
+    home(m1);
 
     gpio_install_isr_service(0);
     gpio_set_intr_type((gpio_num_t)Pe1C, GPIO_INTR_NEGEDGE);
@@ -88,7 +123,7 @@ void app_main() {
 
     printf("init\n");
     int duty = 0;
-    adc a0(A2);
+
     while (1) {
         // printf("%d\n",a0.read());
         float result=0;
