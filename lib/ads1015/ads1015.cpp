@@ -1,3 +1,4 @@
+#pragma once
 #include "ads1015.h"
 
 adc::adc(pins _pin):pin((int)_pin){
