@@ -34,5 +34,5 @@ void arm::home(float speed) {
 
 float arm::getDeg(){
     int raw=pot.readAvrg(10);
-    return max*(float)raw/(rawData[0]-rawData[1])+(float)rawData[1]*250/(rawData[1]-rawData[0]);
+    return max*(float)raw/(rawData[0]-rawData[1])+(float)rawData[1]*max/(rawData[1]-rawData[0]);
 }

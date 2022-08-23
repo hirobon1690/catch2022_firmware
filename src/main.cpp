@@ -27,7 +27,7 @@ void app_main(void);
 gpio dir2(E02, OUTPUT);
 gpio dir3(E03, OUTPUT);
 
-KRA_PID pid(0.01,0,250,0,15);
+KRA_PID pid(0.01,0,250,0,90);
 
 gpio s0(Pe1C, INPUT_PU);
 gpio s1(Pe1D, INPUT_PU);
@@ -83,10 +83,6 @@ void isrTask(void* pvParameters) {
 
 int rawData[2]={0,0};
 
-
-
-
-
 void app_main() {
     Ticker ticker;
     delay_ms(10);
@@ -105,8 +101,8 @@ void app_main() {
     gpio_isr_handler_add((gpio_num_t)Pe1D, gpioIsr, NULL);
     gpio_isr_handler_add((gpio_num_t)USER, gpioIsr, NULL);
     xTaskCreatePinnedToCore(isrTask, "isrTask", 4096, NULL, 10, &taskHandle, 0);
-    pid.setgain(10,1,0);
-    pid.setgoal(110);
+    pid.setgain(15,1,0);
+    pid.setgoal(200);
 
     printf("init\n");
     int duty = 0;
@@ -116,9 +112,10 @@ void app_main() {
         // printf("%d\n",a0.read());
         float result=0;
         result=arm1.getDeg();
-        printf("%f\n",result);
+        // printf("%f\n",result);
         m1.write(pid.calPID(result));
         delay_ms(10);
+        printf("%f\n",m1.duty);
 
         // delay_ms(10);
         // char sample[128];
