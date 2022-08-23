@@ -88,7 +88,7 @@ void app_main() {
 
     printf("init\n");
     int duty = 0;
-    adc a0(A2);
+    adc a0(A3);
     while (1) {
         // dir0.write(1);
         // dir1.write(0);
