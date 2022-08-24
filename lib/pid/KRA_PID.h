@@ -1,3 +1,4 @@
+#pragma once
 #ifndef _KRA_PID_
 #define _KRA_PID_
 

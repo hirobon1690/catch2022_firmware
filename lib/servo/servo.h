@@ -1,3 +1,4 @@
+#pragma once
 #include <driver/ledc.h>
 #include "PinNames.h"
 

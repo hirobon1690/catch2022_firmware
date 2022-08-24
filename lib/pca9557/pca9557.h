@@ -1,3 +1,4 @@
+#pragma once
 #include "i2c.h"
 #include "PinNames.h"
 
