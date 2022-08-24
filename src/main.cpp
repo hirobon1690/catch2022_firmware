@@ -58,7 +58,13 @@ void isrTask(void* pvParameters) {
     while (1) {
         // xSemaphoreTake(semaphore,portMAX_DELAY);
         xTaskNotifyWait(0, 0, NULL, portMAX_DELAY);
-        m0.write(0);
+        if (!isPressed) {
+            m1.write(0);
+            printf("stop\n");
+            isPressed = 1;
+        } else {
+            isPressed = 0;
+        }
         // printf("changed\n");
     }
 }
@@ -88,7 +94,7 @@ void app_main() {
 
     printf("init\n");
     int duty = 0;
-    adc a0(A2);
+    adc a0(A3);
     while (1) {
         // dir0.write(1);
         // dir1.write(0);
