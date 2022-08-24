@@ -19,7 +19,7 @@ void _uart::init() {
 
 void _uart::enableIsr(void (*fn)(void *)) {
     uart_isr_free(UART_NUM_0);
-    uart_isr_register(UART_NUM_0, fn, NULL, ESP_INTR_FLAG_IRAM, &handle_console);
+    uart_isr_register(UART_NUM_0, fn, NULL, ESP_INTR_FLAG_IRAM, NULL);
     uart_enable_rx_intr(UART_NUM_0);
 }
 

@@ -1,9 +1,11 @@
 #include <driver/gpio.h>
 #include <driver/i2c.h>
 #include <driver/mcpwm.h>
+#include <driver/uart.h>
 #include <esp32/rom/ets_sys.h>
 #include <rom/ets_sys.h>
 #include <stdio.h>
+#include <string.h>
 #include "PinNames.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -13,6 +15,8 @@
 #include "ads1015.h"
 #include "motor.h"
 #include "pca9557.h"
+#include "tof.h"
+#include "twai.h"
 #include "uart.h"
 
 extern "C" {
@@ -38,6 +42,22 @@ void enableCore0WDT() {
 
 void disableCore0WDT() {
     TaskHandle_t idle_0 = xTaskGetIdleTaskHandleForCPU(0);
+}
+
+char prevbuf[128];
+char buf[128];
+int indexnum = 0;
+
+void IRAM_ATTR uartIsr(void* arg) {
+
+    // uart_read_bytes(UART_NUM_0, buf + index, 1, 1);
+    // if (*(buf + index) == '\n') {
+    //     *(buf + index) = NULL;
+    //     memcpy(prevbuf, buf, sizeof(buf));
+    //     memset(buf, '\0', sizeof(buf));
+    //     return;
+    // }
+    indexnum++;
 }
 
 void delay_ms(int ms) {
@@ -68,6 +88,8 @@ void isrTask(void* pvParameters) {
         // printf("changed\n");
     }
 }
+
+uart_isr_handle_t *handle_console;
 
 void app_main() {
     delay_ms(10);
