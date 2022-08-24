@@ -1,5 +1,8 @@
+#pragma once
 #include <driver/mcpwm.h>
 #include "PinNames.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 
 class mcpwm {
    public:
@@ -11,3 +14,5 @@ class mcpwm {
     mcpwm_io_signals_t IO_SIGNAL;
     mcpwm_timer_t TIMER_NUM;
 };
+
+void delay_ms(int ms);
