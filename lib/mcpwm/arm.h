@@ -2,6 +2,7 @@
 #include "ads1015.h"
 #include "gpio.h"
 #include "motor.h"
+#include "commonfunc.h"
 
 class arm {
    public:
