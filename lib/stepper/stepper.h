@@ -8,5 +8,5 @@ class stepper {
     void step(int step,bool dir);
 
    private:
-    gpio pin;
+    gpio& pin;
 };

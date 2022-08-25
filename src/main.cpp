@@ -22,6 +22,7 @@
 #include "KRA_PID.h"
 #include "arm.h"
 #include "Ticker.h"
+#include "servo.h"
 
 extern "C" {
 void app_main(void);
@@ -35,26 +36,23 @@ int stepper_state;
 int pump_state;
 int emergency;
 
-const int pidPeriod=10;
+int stepCnt=0;
+int stepCycle=0;
+int targetSpeed=0;
 
-motor m0(Pe1A,MCPWM_UNIT_0,MCPWM_TIMER_0,MCPWM0A,E04,E01);
-motor m1(Pe1B,MCPWM_UNIT_1,MCPWM_TIMER_1,MCPWM1A,E02,E03);
-gpio s00(Pe1C,INPUT_PU);
-gpio s01(Pe1D,INPUT_PU);
-gpio s10(Pe2A,INPUT_PU);
-gpio s11(Pe2B,INPUT_PU);
-gpio user(USER,INPUT_PU);
-gpio pmp[2]={gpio(Pe2A,OUTPUT),gpio(Pe2B,OUTPUT)};
-gpio vlv[2]={gpio(Pe2C,OUTPUT),gpio(Pe2D,OUTPUT)};
-adc pot0(A2);
-adc pot1(A3);
-arm a0(m0,user,user,pot0,250);
-arm a1(m1,user,user,pot1,276);
-KRA_PID pid0(pidPeriod,0,250,0,30);
-KRA_PID pid1(pidPeriod,0,276,0,30);
+const int stpPeriod=10;
 
 Ticker ticker0;
 Ticker ticker1;
+
+gpio stp(Pe2A,OUTPUT);
+gpio slp(E04,OUTPUT);
+gpio dir(E05,OUTPUT);
+servo servo0(Pe2B,0,360);
+gpio s10(Pe2C, INPUT_PU);
+gpio s11(Pe2D,INPUT_PU);
+
+twai_message_t msg;
 
 float unpackFloat(char* buf, int index) {
     return *(float*)(buf + index);
@@ -64,45 +62,62 @@ int unpackInt(char* buf, int index) {
     return *(buf + index);
 }
 
-void turnPmp(bool val){
-    for(int i=0;i<2;i++){
-        pmp[i].write(val);
-        vlv[i].write(val);
+void receiveTwai(void* pvParameters) {
+    while (1) {
+        twai.read(&msg);
+        // printf("%d\n",msg.data);
     }
 }
 
-void receiveUart(void* pvParameters) {
-    while (1) {
-        uart_read_bytes(UART_NUM_0, uart_msg, 16, portMAX_DELAY);
-        if (uart_msg[15] != 0xFF) {
-            printf("Connection Failed!\n");
-            while(1){
-                char buf[1];
-                uart_read_bytes(UART_NUM_0,buf,1,portMAX_DELAY);
-                if(buf[0]==0xFF){
-                    break;
-                }
-            }
-        }
-        move_cmd[0] = unpackFloat(uart_msg, 0);
-        move_cmd[1] = unpackFloat(uart_msg, 4);
-        pid0.setgoal(move_cmd[0]);
-        pid1.setgoal(move_cmd[1]);
-        servo_angle = unpackFloat(uart_msg, 8);
-        stepper_state = unpackInt(uart_msg, 12);
-        pump_state = (bool)unpackInt(uart_msg, 13);
-        turnPmp(pump_state);
-        emergency = unpackInt(uart_msg, 14);
+
+void step() {
+    if (stepCnt >= stepCycle) {
+        stepCnt = 0;
+    } else {
+        stepCnt += 50;
     }
+    stp.write((stepCycle != 6000 && stepCnt < 100));
+}
+
+void stepAc(void* pvParameters) {
+    while (1) {
+        if(stepCycle<targetSpeed){
+            stepCycle++;
+            delay_ms(1);
+        }else if(stepCycle>targetSpeed){
+            stepCycle--;
+            delay_ms(1);
+        }
+    }
+}
+
+void setSpeed(int speed){
+    targetSpeed=speed;
+}
+
+void homeStp(){
+    dir.write(0);
+    stepCnt=2000;
+     while (1) {
+        if (!s10.read()) {
+            break;
+        }
+        delay_ms(1);
+    }
+    stepCnt=0;
+    dir.write(1);
+    stepCnt=2000;
+    while (1) {
+        if (!s11.read()) {
+            break;
+        }
+        delay_ms(1);
+    }
+    stepCnt=0;
 }
 
 void calPID(){
-    float currentDeg[2]={0,0};
-    currentDeg[0]=a0.getDeg();
-    currentDeg[1]=a1.getDeg();
-    m0.write(pid0.calPID(currentDeg[0]));
-    m1.write(pid1.calPID(currentDeg[1]));
-    printf("%f, %f\n",currentDeg[0],currentDeg[1]);
+    
 }
 
 void app_main() {
@@ -110,15 +125,14 @@ void app_main() {
     ex.set();
     uart.init();
     twai.init();
-    pid0.setgain(10,0,0);
-    pid1.setgain(10,0,0);
-    a0.home(30);
-    pid0.setgoal(125);
-
-    ticker0.attach_ms(pidPeriod,calPID);
+    slp.write(1);
+    ticker0.attach_us(stpPeriod,step);
     // ticker1.attach_ms(pidPeriod,calA1PID);
-    xTaskCreatePinnedToCore(receiveUart, "receiveUart", 4096, NULL, 22, &taskHandle, 0);
+    xTaskCreatePinnedToCore(receiveTwai, "receiveTwai", 4096, NULL, 22, &taskHandle, 0);
+    xTaskCreatePinnedToCore(receiveTwai, "stepAc", 4096, NULL, 22, &taskHandle, 1);
+    setSpeed(3000);
     while (1) {
+        
         delay_ms(10);
     }
 }
