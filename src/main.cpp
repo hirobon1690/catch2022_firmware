@@ -40,7 +40,7 @@ int stepCnt=0;
 int stepCycle=0;
 int targetSpeed=0;
 
-const int stpPeriod=10;
+const int stpPeriod=50;
 
 Ticker ticker0;
 Ticker ticker1;
@@ -126,10 +126,10 @@ void app_main() {
     uart.init();
     twai.init();
     slp.write(1);
-    ticker0.attach_us(stpPeriod,step);
+    // ticker0.attach_us(stpPeriod,step);
     // ticker1.attach_ms(pidPeriod,calA1PID);
-    xTaskCreatePinnedToCore(receiveTwai, "receiveTwai", 4096, NULL, 22, &taskHandle, 0);
-    xTaskCreatePinnedToCore(receiveTwai, "stepAc", 4096, NULL, 22, &taskHandle, 1);
+    // xTaskCreatePinnedToCore(receiveTwai, "receiveTwai", 4096, NULL, 22, &taskHandle, 0);
+    // xTaskCreatePinnedToCore(receiveTwai, "stepAc", 4096, NULL, 22, &taskHandle, 1);
     setSpeed(3000);
     while (1) {
         
