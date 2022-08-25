@@ -38,12 +38,18 @@ void app_main() {
     while (1) {
         // result[0]=pin0.read();
         result[0]=0;
+        result[1]=0;
         for(int i=0;i<100;i++){
             result[0]+=pin0.read();
             delay_ms(1);
         }
+        for(int i=0;i<100;i++){
+            result[1]+=pin1.read();
+            delay_ms(1);
+        }
+        
         // result[1]=pin1.read();
-        printf("%d\n",result[0]/100);
+        printf("%d, %d\n",result[0]/100,result[1]/100);
         // delay_ms(100);    
     }
 }
