@@ -16,6 +16,6 @@ class adc{
 
     private:
         int pin;
-        uint8_t conf[3]={0b00000000,0b10000010,0b10000011};
+        uint8_t conf[3]={0b00000000,0b10000011,0b10000011};
         const uint8_t ADDR=0x48;
 };
