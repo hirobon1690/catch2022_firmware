@@ -23,7 +23,6 @@ int adc::readAvrg(int times){
     int result=0;
     for(int i=0;i<times;i++){
         result+=this->read();
-        delay_ms(1);
     }
     return result/times;
 }
