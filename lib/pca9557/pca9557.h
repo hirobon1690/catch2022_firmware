@@ -10,7 +10,7 @@ class gpioex{
         bool read(PinName _pin);
 
     private:
-        const uint8_t ADDR = 0x19;
+        const uint8_t ADDR = 0x18;
         uint8_t input = 0x00;
         uint8_t output = 0x00;
         uint8_t config = 0x00;    //リトルエンディアン
