@@ -1,9 +1,9 @@
 #pragma once
 #include "ads1015.h"
+#include "commonfunc.h"
 
 adc::adc(pins _pin):pin((int)_pin){
     conf[1]|=(pin<<4);
-    printf("%d",conf[1]);
 }
 
 void adc::init(){
@@ -23,6 +23,7 @@ int adc::readAvrg(int times){
     int result=0;
     for(int i=0;i<times;i++){
         result+=this->read();
+        delay_ms(1);
     }
     return result/times;
 }

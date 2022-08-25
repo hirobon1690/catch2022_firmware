@@ -14,7 +14,7 @@ void arm::home(float speed) {
         delay_ms(1);
     }
     m0.write(0);
-    rawData[0] = pot.readAvrg(100);
+    rawData[0] = pot.readAvrg(10);
     printf("%d\n", rawData[0]);
     delay_ms(100);
     m0.write(-speed);
@@ -25,7 +25,7 @@ void arm::home(float speed) {
         delay_ms(1);
     }
     m0.write(0);
-    rawData[1] = pot.readAvrg(100);
+    rawData[1] = pot.readAvrg(10);
     printf("%d\n", rawData[1]);
     m0.write(speed);
     delay_ms(100);
