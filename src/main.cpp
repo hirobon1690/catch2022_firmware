@@ -97,15 +97,16 @@ void receiveUart(void* pvParameters) {
 }
 
 void calPID(void* pvParameters) {
+    float currentDeg[2] = {0, 0};
     while (1) {
-        float currentDeg[2] = {0, 0};
         currentDeg[0] = pot0.read();
-        delay_ms(5);
+        delay_ms(10);
         currentDeg[1] = pot1.read();
+        delay_ms(10);
         // m0.write(pid0.calPID(currentDeg[0]));
         // m1.write(pid1.calPID(currentDeg[1]));
         printf("%f, %f\n", currentDeg[0], currentDeg[1]);
-        delay_ms(pidPeriod-5);
+        delay_ms(pidPeriod - 2);
     }
 }
 
