@@ -96,14 +96,17 @@ void receiveUart(void* pvParameters) {
     }
 }
 
-void calPID() {
-    float currentDeg[2] = {0, 0};
-    currentDeg[0] = pot0.read();
-    delay_ms(2);
-    currentDeg[1] = pot1.read();
-    m0.write(pid0.calPID(currentDeg[0]));
-    m1.write(pid1.calPID(currentDeg[1]));
-    printf("%f, %f\n", currentDeg[0], currentDeg[1]);
+void calPID(void* pvParameters) {
+    while (1) {
+        float currentDeg[2] = {0, 0};
+        currentDeg[0] = pot0.read();
+        delay_ms(5);
+        currentDeg[1] = pot1.read();
+        // m0.write(pid0.calPID(currentDeg[0]));
+        // m1.write(pid1.calPID(currentDeg[1]));
+        printf("%f, %f\n", currentDeg[0], currentDeg[1]);
+        delay_ms(pidPeriod-5);
+    }
 }
 
 void app_main() {
@@ -116,10 +119,11 @@ void app_main() {
     // a0.home(15);
     // a1.home(30);
     pid0.setgoal(125);
-    ticker0.attach_ms(pidPeriod, calPID);
+    // ticker0.attach_ms(pidPeriod, calPID);
 
     // ticker1.attach_ms(pidPeriod,calA1PID);
     xTaskCreatePinnedToCore(receiveUart, "receiveUart", 4096, NULL, 22, &taskHandle, 0);
+    xTaskCreatePinnedToCore(calPID, "calPID", 4096, NULL, 22, &taskHandle, 1);
     while (1) {
         delay_ms(10);
     }
