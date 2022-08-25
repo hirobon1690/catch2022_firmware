@@ -46,8 +46,8 @@ gpio s11(Pe2B,INPUT_PU);
 gpio user(USER,INPUT_PU);
 gpio pmp[2]={gpio(Pe0A,OUTPUT),gpio(Pe0B,OUTPUT)};
 gpio vlv[2]={gpio(Pe0C,OUTPUT),gpio(Pe0D,OUTPUT)};
-adc pot0(A3);
-adc pot1(A2);
+adc pot0(A2);
+adc pot1(A3);
 arm a0(m0,s00,s01,pot0,250);
 arm a1(m1,s10,s11,pot1,276);
 KRA_PID pid0(pidPeriod,0,250,0,30);
@@ -114,7 +114,9 @@ void app_main() {
     pid1.setgain(10,0,0);
     while(1){
         delay_ms(100);
-        printf("%d,%d\n",pot0.readAvrg(10),pot1.readAvrg(10));
+        int a=pot0.readAvrg(10);
+        int b=pot1.readAvrg(10);
+        printf("%d,%d\n",a,b);
     }
     a0.home(15);
     pid0.setgoal(125);
