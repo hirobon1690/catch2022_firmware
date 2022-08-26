@@ -116,7 +116,7 @@ void adctest(void* pvParameters){
     while (1) {
         xTaskNotifyWait(0, 0, NULL, portMAX_DELAY);
         currentDeg[0] = a0.getDeg();
-        // delay_ms(3);
+        delay_ms(3);
         currentDeg[1] = a1.getDeg();
         // delay_ms(3);
         m0.write(pid0.calPID(currentDeg[0]));
@@ -130,6 +130,7 @@ void app_main() {
     ex.set();
     uart.init();
     twai.init();
+    int result[2];
     pid0.setgain(10, 0, 0);
     pid1.setgain(10, 0, 0);
     a0.home(15);

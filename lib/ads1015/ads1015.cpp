@@ -3,7 +3,7 @@
 #include "commonfunc.h"
 
 adc::adc(pins _pin):pin((int)_pin){
-    conf[1]|=(pin<<4);
+    this->conf[1]|=(pin<<4);
 }
 
 void adc::init(){
