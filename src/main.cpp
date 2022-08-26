@@ -43,7 +43,7 @@ void app_main() {
             delay_ms(1);    
         
         // result[1]=pin1.read();
-        printf("%d, %d\n",result[0],result[1]);
+        printf("% 4d, % 4d\n",result[0],result[1]);
         
     }
 }
