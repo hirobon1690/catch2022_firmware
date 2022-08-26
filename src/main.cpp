@@ -38,7 +38,7 @@ int emergency;
 const int pidPeriod = 10;
 
 motor m0(Pe1A, MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM0A, E04, E01);
-motor m1(Pe1B, MCPWM_UNIT_1, MCPWM_TIMER_1, MCPWM1A, E03, E02);
+motor m1(Pe1B, MCPWM_UNIT_1, MCPWM_TIMER_1, MCPWM1A, E02, E03);
 gpio s00(Pe1C, INPUT_PU);
 gpio s01(Pe1D, INPUT_PU);
 gpio s10(Pe2A, INPUT_PU);
@@ -51,7 +51,7 @@ adc pot1(A3);
 arm a0(m0, s00, s01, pot0, 250);
 arm a1(m1, s10, s11, pot1, 276);
 KRA_PID pid0(pidPeriod, 0, 250, 0, 15);
-KRA_PID pid1(pidPeriod, 0, 276, 0, 30);
+KRA_PID pid1(pidPeriod, 0, 276, 0, 15);
 
 Ticker ticker0;
 Ticker ticker1;
@@ -119,9 +119,9 @@ void adctest(void* pvParameters){
         delay_ms(3);
         currentDeg[1] = a1.getDeg();
         // delay_ms(3);
-        m0.write(pid0.calPID(currentDeg[0]));
-        // m1.write(pid1.calPID(currentDeg[1]));
-        printf("%3.2f, %3.2f\n", currentDeg[0], currentDeg[1]);
+        // m0.write(pid0.calPID(currentDeg[0]));
+        m1.write(pid1.calPID(currentDeg[1]));
+        // printf("%3.2f, %3.2f\n", currentDeg[0], currentDeg[1]);
     }
 }
 
@@ -133,8 +133,8 @@ void app_main() {
     int result[2];
     pid0.setgain(10, 0, 0);
     pid1.setgain(10, 0, 0);
-    a0.home(15);
-    // a1.home(30);
+    // a0.home(15);
+    a1.home(15);
     pid0.setgoal(125);
     ticker0.attach_ms(pidPeriod, calPID);
 
