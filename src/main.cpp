@@ -91,7 +91,7 @@ void app_main() {
     // disableCore0WDT();
     uart.init();
     // arm0.home(15);
-    arm1.home(30);
+    arm0.home(15);
 
     gpio_install_isr_service(0);
     gpio_set_intr_type((gpio_num_t)Pe1C, GPIO_INTR_NEGEDGE);
@@ -106,14 +106,14 @@ void app_main() {
 
     printf("init\n");
     int duty = 0;
-    m1.write(20);
+    // m1.write(20);
 
     while (1) {
         // printf("%d\n",a0.read());
         float result=0;
-        result=arm1.getDeg();
+        result=arm0.getDeg();
         // printf("%f\n",result);
-        m1.write(pid.calPID(result));
+        m0.write(pid.calPID(result));
         delay_ms(10);
         printf("%f\n",m1.duty);
 
