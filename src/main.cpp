@@ -97,15 +97,16 @@ void receiveUart(void* pvParameters) {
 }
 
 void calPID() {
-    float currentDeg[2] = {0, 0};
+    xTaskNotify(taskHandle, 0, eNoAction);
+    // float currentDeg[2] = {0, 0};
     // while (1) {
-        currentDeg[0] = a0.getDeg();
+        // currentDeg[0] = a0.getDeg();
         // delay_ms(2);
-        currentDeg[1] = a1.getDeg();
+        // currentDeg[1] = a1.getDeg();
         // delay_ms(2);
         // m0.write(pid0.calPID(currentDeg[0]));
         // m1.write(pid1.calPID(currentDeg[1]));
-        printf("%f, %f\n", currentDeg[0], currentDeg[1]);
+        // printf("%f, %f\n", currentDeg[0], currentDeg[1]);
         // delay_ms(8);
     // }
 }
@@ -113,10 +114,11 @@ void calPID() {
 void adctest(void* pvParameters){
     float currentDeg[2] = {0, 0};
     while (1) {
+        xTaskNotifyWait(0, 0, NULL, portMAX_DELAY);
         currentDeg[0] = a0.getDeg();
-        delay_ms(3);
+        // delay_ms(3);
         currentDeg[1] = a1.getDeg();
-        delay_ms(3);
+        // delay_ms(3);
         m0.write(pid0.calPID(currentDeg[0]));
         // m1.write(pid1.calPID(currentDeg[1]));
         printf("%3.2f, %3.2f\n", currentDeg[0], currentDeg[1]);
@@ -133,7 +135,7 @@ void app_main() {
     a0.home(15);
     // a1.home(30);
     pid0.setgoal(125);
-    // ticker0.attach_ms(pidPeriod, calPID);
+    ticker0.attach_ms(pidPeriod, calPID);
 
     // ticker1.attach_ms(pidPeriod,calA1PID);
     xTaskCreatePinnedToCore(receiveUart, "receiveUart", 4096, NULL, 22, &taskHandle, 0);
