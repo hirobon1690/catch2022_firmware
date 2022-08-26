@@ -100,29 +100,69 @@ void calPID() {
     xTaskNotify(taskHandle, 0, eNoAction);
     // float currentDeg[2] = {0, 0};
     // while (1) {
-        // currentDeg[0] = a0.getDeg();
-        // delay_ms(2);
-        // currentDeg[1] = a1.getDeg();
-        // delay_ms(2);
-        // m0.write(pid0.calPID(currentDeg[0]));
-        // m1.write(pid1.calPID(currentDeg[1]));
-        // printf("%f, %f\n", currentDeg[0], currentDeg[1]);
-        // delay_ms(8);
+    // currentDeg[0] = a0.getDeg();
+    // delay_ms(2);
+    // currentDeg[1] = a1.getDeg();
+    // delay_ms(2);
+    // m0.write(pid0.calPID(currentDeg[0]));
+    // m1.write(pid1.calPID(currentDeg[1]));
+    // printf("%f, %f\n", currentDeg[0], currentDeg[1]);
+    // delay_ms(8);
     // }
 }
 
-void adctest(void* pvParameters){
+void adctest(void* pvParameters) {
     float currentDeg[2] = {0, 0};
     while (1) {
         xTaskNotifyWait(0, 0, NULL, portMAX_DELAY);
-        currentDeg[0] = a0.getDeg();
+        currentDeg[0] = pot0.read();  // a0.getDeg();
         delay_ms(3);
-        currentDeg[1] = a1.getDeg();
+        currentDeg[1] = pot1.read();  // a1.getDeg();
         // delay_ms(3);
         // m0.write(pid0.calPID(currentDeg[0]));
-        m1.write(pid1.calPID(currentDeg[1]));
-        // printf("%3.2f, %3.2f\n", currentDeg[0], currentDeg[1]);
+        // m1.write(pid1.calPID(currentDeg[1]));
+        printf("%3.2f, %3.2f\n", currentDeg[0], currentDeg[1]);
     }
+}
+
+void adConvert(void* pvParameters) {
+    while (1) {
+        int currentDeg[2] = {0, 0};
+        currentDeg[0] = pot0.read();
+        currentDeg[1] = pot1.read();
+        printf("%d, %d\n", currentDeg[0], currentDeg[1]);
+        delay_ms(10);
+    }
+}
+
+int rawData[2] = {0, 0};
+void a1home() {
+    m1.write(-15);
+    delay_ms(100);
+    m0.write(15);
+    while (1) {
+        if (!s10.read()) {
+            break;
+        }
+        delay_ms(1);
+    }
+    m0.write(0);
+    rawData[0] = pot1.read();
+    printf("%d\n", rawData[0]);
+    delay_ms(100);
+    m0.write(-15);
+    while (1) {
+        if (!s11.read()) {
+            break;
+        }
+        delay_ms(1);
+    }
+    m0.write(0);
+    rawData[1] = pot1.read();
+    printf("%d\n", rawData[1]);
+    m0.write(15);
+    delay_ms(100);
+    m0.write(0);
 }
 
 void app_main() {
@@ -134,13 +174,14 @@ void app_main() {
     pid0.setgain(10, 0, 0);
     pid1.setgain(10, 0, 0);
     // a0.home(15);
-    a1.home(15);
+    // a1home();
     pid0.setgoal(125);
     ticker0.attach_ms(pidPeriod, calPID);
 
     // ticker1.attach_ms(pidPeriod,calA1PID);
     xTaskCreatePinnedToCore(receiveUart, "receiveUart", 4096, NULL, 22, &taskHandle, 0);
-    xTaskCreatePinnedToCore(adctest, "adctest", 4096, NULL, 22, &taskHandle, 1);
+    // xTaskCreatePinnedToCore(adctest, "adctest", 4096, NULL, 22, &taskHandle, 1);
+    xTaskCreatePinnedToCore(adConvert, "adctest", 4096, NULL, 23, &taskHandle, 1);
     while (1) {
         delay_ms(10);
     }
