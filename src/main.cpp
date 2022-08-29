@@ -35,6 +35,7 @@ int stepper_state;
 int pump_state;
 int emergency;
 int currentDeg[2] = {0, 0};
+int preDeg[2] = {0, 0};
 
 const int pidPeriod = 10;
 
@@ -98,8 +99,7 @@ void receiveUart(void* pvParameters) {
 }
 
 void calPID() {
-    printf("%3.2f, %3.2f, %d, %d\n", a0.calDeg(currentDeg[0]), a1.calDeg(currentDeg[1]),currentDeg[0],currentDeg[1]);
-
+    printf("%3.2f, %3.2f, %d, %d, %f, %f\n", a0.calDeg(currentDeg[0]), a1.calDeg(currentDeg[1]), currentDeg[0], currentDeg[1], m0.duty, m1.duty);
     // xTaskNotify(taskHandle, 0, eNoAction);
     // float currentDeg[2] = {0, 0};
     // while (1) {
@@ -108,7 +108,7 @@ void calPID() {
     // currentDeg[1] = a1.getDeg();
     // delay_ms(2);
     // m0.write(pid0.calPID(currentDeg[0]));
-    // m0.write(pid0.calPID(a0.calDeg(currentDeg[0])));
+    m0.write(pid0.calPID(a0.calDeg(currentDeg[0])));
     m1.write(pid1.calPID(a1.calDeg(currentDeg[1])));
     // printf("%f, %f\n", currentDeg[0], currentDeg[1]);
     // delay_ms(8);
@@ -124,20 +124,29 @@ void adctest(void* pvParameters) {
         // delay_ms(3);
         // m0.write(pid0.calPID(currentDeg[0]));
         // m1.write(pid1.calPID(currentDeg[1]));
-        printf("%3.2f, %3.2f, %d, %d\n", a0.calDeg(currentDeg[0]), a1.calDeg(currentDeg[1]),currentDeg[0],currentDeg[1]);
+        printf("%3.2f, %3.2f, %d, %d\n", a0.calDeg(currentDeg[0]), a1.calDeg(currentDeg[1]), currentDeg[0], currentDeg[1]);
     }
 }
 
 void adConvert(void* pvParameters) {
     while (1) {
         currentDeg[0] = pot0.readAvrg(10);
+        delay_ms(5);
         currentDeg[1] = pot1.readAvrg(10);
         // printf("%d, %d\n", currentDeg[0], currentDeg[1]);
-        delay_ms(10);
+        // if (abs(currentDeg[0] - preDeg[0]) >= 100) {
+        //     currentDeg[0] = preDeg[0];
+        //     continue;
+        // }
+        // if (abs(currentDeg[1] - preDeg[1]) >= 100) {
+        //     currentDeg[1] = preDeg[1];
+        //     continue;
+        // }
+        // preDeg[0]=currentDeg[0];
+        // preDeg[1]=currentDeg[1];
+        delay_ms(5);
     }
 }
-
-
 
 int rawData[2] = {0, 0};
 
@@ -149,16 +158,32 @@ void app_main() {
     int result[2];
     pid0.setgain(10, 0, 0);
     pid1.setgain(10, 0, 0);
-    a1.home(15);
+    m0.write(-10);
+    m1.write(10);
+    // while (1) {
+    //     for (int i = 0; i < 50; i++) {
+    //         // m0.write(i);
+    //         m1.write(i);
+    //         delay_ms(100);
+    //     }
+    //     for (int i = 50; i > 0; i--) {
+    //         // m0.write(i);
+    //         m1.write(i);
+    //         delay_ms(100);
+    //     }
+    // }
+
     // a0.home(15);
+    // a1.home(15);
     // a1home();
-    pid1.setgoal(125);
-    ticker0.attach_ms(pidPeriod, calPID);
+    pid0.setgoal(125);
+    pid1.setgoal(138);
+    // ticker0.attach_ms(pidPeriod, calPID);
 
     // ticker1.attach_ms(pidPeriod,calA1PID);
-    xTaskCreatePinnedToCore(receiveUart, "receiveUart", 4096, NULL, 22, &taskHandle, 0);
+    // xTaskCreatePinnedToCore(receiveUart, "receiveUart", 4096, NULL, 22, &taskHandle, 0);
     // xTaskCreatePinnedToCore(adctest, "adctest", 4096, NULL, 23, &taskHandle, 1);
-    xTaskCreatePinnedToCore(adConvert, "adConvert", 4096, NULL, 22, &taskHandle, 1);
+    // xTaskCreatePinnedToCore(adConvert, "adConvert", 4096, NULL, 22, &taskHandle, 1);
     while (1) {
         delay_ms(10);
     }

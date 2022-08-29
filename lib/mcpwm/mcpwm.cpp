@@ -16,7 +16,7 @@
 mcpwm::mcpwm(PinName pin,mcpwm_unit_t mcpwm_num, mcpwm_timer_t timer_num,mcpwm_io_signals_t io_signal):MCPWM_NUM(mcpwm_num),IO_SIGNAL(io_signal),TIMER_NUM(timer_num){
     mcpwm_gpio_init(MCPWM_NUM, IO_SIGNAL, (int)pin);
     mcpwm_config_t pwmconfig;
-    pwmconfig.frequency = 100000;
+    pwmconfig.frequency = 10000;
     pwmconfig.cmpr_a = 0;  // duty cycle of PWMxA = 0
     pwmconfig.counter_mode = MCPWM_UP_COUNTER;
     pwmconfig.duty_mode = MCPWM_DUTY_MODE_0;
