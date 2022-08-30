@@ -4,7 +4,7 @@
 
 class KRA_PID {
    public:
-    KRA_PID(float _Tspan, float _in_min, float _in_max, float _out_min, float _out_max);
+    KRA_PID(float _Tspan, float _in_min, float _in_max, float _out_min, float _out_max, float _kasoku);
 
     float Tspan;    // dtの長さ
     float In_min;   //入力の下限
@@ -12,6 +12,7 @@ class KRA_PID {
     float Out_min;  //出力の下限
     float Out_max;  //出力の上限
     int Out_sign;   //出力値の符号
+    float Kasoku;   //加速度の上限
 
     bool judgePID();                    //目標値に達したか判定
     void setgain(float, float, float);  //ゲインの設定

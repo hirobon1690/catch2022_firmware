@@ -1,8 +1,9 @@
 #include "KRA_PID.h"
 #include <math.h>
+#include <stdio.h>
 
-KRA_PID::KRA_PID(float _Tspan, float _in_min, float _in_max, float _out_min, float _out_max)
-    : Tspan(_Tspan), In_min(_in_min), In_max(_in_max), Out_min(_out_min), Out_max(_out_max) {
+KRA_PID::KRA_PID(float _Tspan, float _in_min, float _in_max, float _out_min, float _out_max, float _kasoku)
+    : Tspan(_Tspan), In_min(_in_min), In_max(_in_max), Out_min(_out_min), Out_max(_out_max), Kasoku(_kasoku) {
     Out_sign = 0;
 
     Kp = 0;  //比例ゲイン
@@ -56,7 +57,16 @@ float KRA_PID::calPID(float argument) {
 
     //出力を計算
     pid_output = Kp * error + Ki * acc + Kd * dif;
-
+    if(abs(error) > 0.05){
+        if((pid_output-Prev_O)>(Kasoku*Tspan)){
+            pid_output=Prev_O+Kasoku*Tspan;
+            // printf("POWER!\n");
+            // printf("%f ; %f ; %f ; %f\n",pid_output,Prev_O,Kasoku,Tspan);
+        }else if((pid_output-Prev_O)<(-Kasoku*Tspan)){
+            pid_output=Prev_O-Kasoku*Tspan;
+            // printf("YA!\n");
+        }
+    }
     //パラメータの更新
     Prev_O = pid_output;
     Prev_E = error;
@@ -73,7 +83,7 @@ float KRA_PID::calPID(float argument) {
 }
 
 bool KRA_PID::judgePID() {
-    if (abs(Prev_E) < 0.05) {
+    if (abs(Prev_E) < 0.01) {
         return true;
     } else {
         return false;
