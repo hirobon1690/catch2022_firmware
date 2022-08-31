@@ -33,7 +33,7 @@ char uart_msg_tx[11] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0x00, 0xFF};
 float move_cmd[2];
 float servo_angle;
 int stepper_state;
-int pump_state;
+int pmp_state;
 int emergency;
 int currentDeg[2] = {0, 0};
 int preDeg[2] = {0, 0};
@@ -78,7 +78,7 @@ void turnPmp(bool val) {
 void receiveUart(void* pvParameters) {
     while (1) {
         *(float*)uart_msg_tx = a0.calDeg(currentDeg[0]);
-        *(float*)(uart_msg_tx + 4) =a1.calDeg(currentDeg[1]);
+        *(float*)(uart_msg_tx + 4) = a1.calDeg(currentDeg[1]);
         *(bool*)(uart_msg_tx + 9) = is_grabbed;
         uart_write_bytes(UART_NUM_0, uart_msg_tx, 11);
         uart_read_bytes(UART_NUM_0, uart_msg, 16, portMAX_DELAY);
@@ -98,9 +98,21 @@ void receiveUart(void* pvParameters) {
         pid1.setgoal(move_cmd[1]);
         servo_angle = unpackFloat(uart_msg, 8);
         stepper_state = unpackInt(uart_msg, 12);
-        pump_state = (bool)unpackInt(uart_msg, 13);
-        turnPmp(pump_state);
+        // turnPmp(stepper_state);
+        pmp_state = (bool)unpackInt(uart_msg, 13);
+        turnPmp(pmp_state);
         emergency = unpackInt(uart_msg, 14);
+    }
+}
+
+void sendTwai(void* pvParameters) {
+    while (1) {
+        unsigned char twai_msg_tx[5];
+        twai_msg_tx[0]=stepper_state;
+        // *(float*)(msg.data + 1) = servo_angle;
+        // printf("%d\n",stepper_state);
+        twai.write(0x00,twai_msg_tx,5);
+        delay_ms(100);
     }
 }
 
@@ -210,9 +222,10 @@ void app_main() {
     ticker0.attach_ms(pidPeriod, calPID);
 
     // ticker1.attach_ms(pidPeriod,calA1PID);
+    xTaskCreatePinnedToCore(sendTwai, "sendTwai", 2048, NULL, 21, &taskHandle, 0);
     xTaskCreatePinnedToCore(receiveUart, "receiveUart", 4096, NULL, 22, &taskHandle, 0);
     // xTaskCreatePinnedToCore(adctest, "adctest", 4096, NULL, 23, &taskHandle, 1);
-    xTaskCreatePinnedToCore(adConvert, "adConvert", 4096, NULL, 22, &taskHandle, 1);
+    xTaskCreatePinnedToCore(adConvert, "adConvert", 2048, NULL, 22, &taskHandle, 1);
     while (1) {
         if (!s00.read() && m0.duty > 0) {
             m0.write(0);
