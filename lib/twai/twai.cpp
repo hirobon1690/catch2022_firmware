@@ -34,13 +34,13 @@ void _twai::write(unsigned char id,unsigned char* data, size_t size) {
     for (int i = 0; i < size; i++) {
         msg.data[i] = *(data + i);
     }
-    twai_transmit(&msg, pdMS_TO_TICKS(1000));
+    twai_transmit(&msg, portMAX_DELAY);
 }
 
 void _twai::write(twai_message_t* msg) {
-    twai_transmit(msg, pdMS_TO_TICKS(1000));
+    twai_transmit(msg, portMAX_DELAY);
 }
 
 void _twai::read(twai_message_t* msg){
-    twai_receive(msg, pdMS_TO_TICKS(10000));
+    twai_receive(msg, portMAX_DELAY);
 }
