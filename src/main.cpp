@@ -5,6 +5,7 @@
 #include <esp32/rom/ets_sys.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
+#include <math.h>
 #include <rom/ets_sys.h>
 #include <stdio.h>
 #include <string.h>
@@ -37,11 +38,12 @@ int pump_state;
 int emergency;
 
 int stepCnt = 0;
-int stepCycle = 8000;
+int stepCycle = 6000;
 int targetSpeed = 0;
 int steps = 0;
-const int minSpeed = 8000;
-const int acceralationLimit=400;
+int currentStep = 0;
+const int minSpeed = 6000;
+const int acceralationLimit = 400;
 
 const int stpPeriod = 50;
 
@@ -54,6 +56,7 @@ gpio dir(E05, OUTPUT);
 servo servo0(Pe2B, 0, 360);
 gpio s10(Pe2C, INPUT_PU);
 gpio s11(Pe2D, INPUT_PU);
+gpio user(USER, INPUT_PU);
 
 bool prevVal = 0;
 int targetStep = 0;
@@ -81,9 +84,14 @@ void step() {
     } else {
         stepCnt += 50;
     }
-    stp.write((((stepCycle!=0)||(stepCycle != minSpeed)) && stepCnt < 100));
+    stp.write((((stepCycle != 0) && (stepCycle != minSpeed)) && stepCnt < 100));
     if (prevVal == 1 && stp.read() == 0) {
         steps++;
+        if (dir.read()) {
+            currentStep++;
+        } else {
+            currentStep--;
+        }
     }
     prevVal = stp.read();
 }
@@ -91,17 +99,17 @@ void step() {
 void stepAc(void* pvParameters) {
     int limit;
     while (1) {
-        if(targetStep<=acceralationLimit){
-            limit=targetStep/2;
-        }else{
-            limit=acceralationLimit;
+        if (targetStep <= acceralationLimit) {
+            limit = targetStep / 2;
+        } else {
+            limit = acceralationLimit;
         }
         if (steps < limit) {
-            stepCycle-=2;
+            stepCycle -= 2;
         } else if (steps >= targetStep) {
             stepCycle = 0;
         } else if (steps > targetStep - limit) {
-            stepCycle+=4;
+            stepCycle += 4;
         }
         // if (targetSpeed == 0) {
         //     stepCycle = minSpeed;
@@ -112,6 +120,29 @@ void stepAc(void* pvParameters) {
         // }
         delay_ms(1);
     }
+}
+
+void stepAcc() {
+    int limit;
+    if (targetStep <= acceralationLimit) {
+        limit = targetStep / 2;
+    } else {
+        limit = acceralationLimit;
+    }
+    if (steps < limit) {
+        stepCycle -= 2;
+    } else if (steps >= targetStep) {
+        stepCycle = 0;
+    } else if (steps > targetStep - limit) {
+        stepCycle += 4;
+    }
+    // if (targetSpeed == 0) {
+    //     stepCycle = minSpeed;
+    // } else if (stepCycle < targetSpeed) {
+    //     stepCycle++;
+    // } else if (stepCycle > targetSpeed) {
+    //     stepCycle--;
+    // }
 }
 
 void stepToTarget(void* pvParameters) {
@@ -140,31 +171,34 @@ void setSpeed(int speed, int step) {
     targetStep = step;
 }
 
-void setStep(int step){
-    stepCycle=minSpeed;
+void setStep(int step) {
+    stepCycle = minSpeed;
     steps = 0;
-    targetStep = step;
+    dir.write(step > 0);
+    // dir.write(step > 0);
+    targetStep = abs(step);
 }
 
 void homeStp() {
-    dir.write(0);
-    stepCnt = 5000;
-    while (1) {
-        if (!s10.read()) {
-            break;
-        }
-        delay_ms(1);
-    }
-    stepCnt = 0;
     dir.write(1);
-    stepCnt = 5000;
+    stepCycle = 5000;
     while (1) {
-        if (!s11.read()) {
+        if (!user.read()) {
             break;
         }
         delay_ms(1);
     }
-    stepCnt = 0;
+    stepCycle = minSpeed;
+    dir.write(0);
+    stepCycle = 5000;
+    while (1) {
+        if (!user.read()) {
+            break;
+        }
+        delay_ms(1);
+    }
+    stepCycle = minSpeed;
+    currentStep = 0;
 }
 
 void calPID() {
@@ -177,16 +211,48 @@ void app_main() {
     twai.init();
     slp.write(1);
     ticker0.attach_us(stpPeriod, step);
+    // stepCycle=8000;
+    // while (1) {
+    //     delay_ms(10);
+    // }
+    homeStp();
+    disableCore0WDT();
+
     // ticker1.attach_ms(pidPeriod,calA1PID);
     // xTaskCreatePinnedToCore(receiveTwai, "receiveTwai", 4096, NULL, 22, &taskHandle, 0);
     // xTaskCreatePinnedToCore(stepToTarget, "stepToTarget", 4096, NULL, 22, &taskHandle, 1);
-    xTaskCreatePinnedToCore(stepAc, "stepAc", 4096, NULL, 20, &taskHandle, 1);
-    xTaskCreatePinnedToCore(printStep, "printStep", 4096, NULL, 21, &taskHandle, 0);
-    setSpeed(3000, 1000);
+    // xTaskCreatePinnedToCore(stepAc, "stepAc", 4096, NULL, 22, &taskHandle, 0);
+    ticker1.attach_ms(1, stepAcc);
+
+    // xTaskCreatePinnedToCore(printStep, "printStep", 4096, NULL, 21, &taskHandle, 0);
+    // setSpeed(3000, 1000);
+    stepCycle = minSpeed;
+    dir.write(1);
     char buf[16];
+    setStep(100);
     while (1) {
+        printf("Enter Step\n");
         uart.read(buf);
-        setStep(atoi(buf));
+        int target = 0;
+        switch (atoi(buf)) {
+            case 0:
+                target = 0;
+                break;
+            case 1:
+                target = 260;
+                break;
+            case 2:
+                target = 350;
+                break;
+            case 3:
+                target = 20;
+                break;
+            default:
+                break;
+        }
+        setStep(target - currentStep);
+        // setStep(atoi(buf));  //260 // 350ステップ 20
+        printf("Step state is %d\n", atoi(buf));
         delay_ms(10);
     }
 }
