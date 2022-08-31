@@ -168,11 +168,11 @@ void app_main() {
     ex.set();
     uart.init();
     twai.init();
-    int result[2];
-    currentDeg[0] = pot0.readAvrg(10);
-    delay_ms(5);
-    currentDeg[1] = pot1.readAvrg(10);
-    delay_ms(5);
+    // int result[2];
+    // currentDeg[0] = pot0.readAvrg(10);
+    // delay_ms(5);
+    // currentDeg[1] = pot1.readAvrg(10);
+    // delay_ms(5);
     // printf("init\nPress USER to start\n");
     while (1) {
         if (!user.read()) {
@@ -180,8 +180,8 @@ void app_main() {
         }
         delay_ms(10);
     }
-    pid0.setgain(10, 0, 0);
-    pid1.setgain(10, 0, 0);
+    // pid0.setgain(10, 0, 0);
+    // pid1.setgain(10, 0, 0);
     // m0.write(-10);
     // m1.write(10);
     // while (1) {
@@ -197,35 +197,47 @@ void app_main() {
     //     }
     // }
 
-    pot0.readAvrg(100);
-    pot1.readAvrg(100);
+    // pot0.readAvrg(100);
+    // pot1.readAvrg(100);
     // a0.home(15);
-    a0.home(0, 900, 94);
+    // a0.home(0, 900, 94);
     // a1.home(30);
-    a1.home(0, 140, 1040);
+    // a1.home(0, 140, 1040);
     // a0.home(15);
     // a1home();
-    pid0.setgoal(125);
-    pid1.setgoal(138);
-    ticker0.attach_ms(pidPeriod, calPID);
+    // pid0.setgoal(125);
+    // pid1.setgoal(138);
+    // ticker0.attach_ms(pidPeriod, calPID);
 
     // ticker1.attach_ms(pidPeriod,calA1PID);
-    xTaskCreatePinnedToCore(receiveUart, "receiveUart", 4096, NULL, 22, &taskHandle, 0);
+    // xTaskCreatePinnedToCore(receiveUart, "receiveUart", 4096, NULL, 22, &taskHandle, 0);
     // xTaskCreatePinnedToCore(adctest, "adctest", 4096, NULL, 23, &taskHandle, 1);
-    xTaskCreatePinnedToCore(adConvert, "adConvert", 4096, NULL, 22, &taskHandle, 1);
+    // xTaskCreatePinnedToCore(adConvert, "adConvert", 4096, NULL, 22, &taskHandle, 1);
     while (1) {
-        if (!s00.read() && m0.duty > 0) {
-            m0.write(0);
-        }
-        if (!s01.read() && m0.duty < 0) {
-            m0.write(0);
-        }
-        if (!s10.read() && m1.duty > 0) {
-            m1.write(0);
-        }
-        if (!s11.read() && m1.duty < 0) {
-            m1.write(0);
-        }
+        unsigned char data=0;
+        twai.write(0x00,&data,1);
+        delay_ms(1000);
+        data=1;
+        twai.write(0x00,&data,1);
+        delay_ms(1000);
+        data=2;
+        twai.write(0x00,&data,1);
+        delay_ms(1000);
+        data=3;
+        twai.write(0x00,&data,1);
+        delay_ms(1000);
+        // if (!s00.read() && m0.duty > 0) {
+        //     m0.write(0);
+        // }
+        // if (!s01.read() && m0.duty < 0) {
+        //     m0.write(0);
+        // }
+        // if (!s10.read() && m1.duty > 0) {
+        //     m1.write(0);
+        // }
+        // if (!s11.read() && m1.duty < 0) {
+        //     m1.write(0);
+        // }
         delay_ms(10);
     }
 }
