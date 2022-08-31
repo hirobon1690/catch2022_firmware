@@ -217,19 +217,19 @@ void app_main() {
         unsigned char data=0;
         twai.write(0x00,&data,1);
         printf("Sent 0\n");
-        delay_ms(1000);
+        delay_ms(2000);
         data=1;
         twai.write(0x00,&data,1);
         printf("Sent 1\n");
-        delay_ms(1000);
+        delay_ms(2000);
         data=2;
         twai.write(0x00,&data,1);
         printf("Sent 2\n");
-        delay_ms(1000);
+        delay_ms(2000);
         data=3;
         twai.write(0x00,&data,1);
         printf("Sent 3\n");
-        delay_ms(1000);
+        delay_ms(2000);
         // if (!s00.read() && m0.duty > 0) {
         //     m0.write(0);
         // }
