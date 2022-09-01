@@ -60,6 +60,20 @@ enum PinName{
     E17
 };
 
+const PinName Pe0A=P4;
+const PinName Pe0B=P5;
+const PinName Pe0C=P12;
+const PinName Pe0D=P13;
+const PinName Pe1A=P14;
+const PinName Pe1B=P15;
+const PinName Pe1C=P16;
+const PinName Pe1D=P17;
+const PinName Pe2A=P18;
+const PinName Pe2B=P19;
+const PinName Pe2C=P26;
+const PinName Pe2D=P27;
+const PinName USER=P2;
+
 enum PinMode{
     OUTPUT,
     INPUT_PU,

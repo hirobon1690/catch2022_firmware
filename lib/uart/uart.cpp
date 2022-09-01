@@ -19,7 +19,7 @@ void _uart::init() {
 
 void _uart::enableIsr(void (*fn)(void *)) {
     uart_isr_free(UART_NUM_0);
-    uart_isr_register(UART_NUM_0, fn, NULL, ESP_INTR_FLAG_IRAM, &handle_console);
+    uart_isr_register(UART_NUM_0, fn, NULL, ESP_INTR_FLAG_IRAM, NULL);
     uart_enable_rx_intr(UART_NUM_0);
 }
 
@@ -30,7 +30,7 @@ void _uart::write(char* val) {
 void _uart::read(char* val) {
     int index = 0;
     while (1) {
-        uart_read_bytes(UART_NUM_0, val + index, 1, 1000000);
+        uart_read_bytes(UART_NUM_0, val + index, 1, portMAX_DELAY);
         if (*(val + index) == '\n') {
             *(val + index) = NULL;
             return;
