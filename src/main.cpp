@@ -230,11 +230,15 @@ void app_main() {
     dir.write(1);
     char buf[16];
     setStep(100);
+    delay_ms(50);
     while (1) {
         printf("Enter Step\n");
-        uart.read(buf);
+        twai_message_t msg;
+        twai.read(&msg);
         int target = 0;
-        switch (atoi(buf)) {
+        // float angle=unpackFloat((char*)(msg.data),1);
+        // servo0.write(angle);
+        switch (msg.data[0]) {
             case 0:
                 target = 0;
                 break;
@@ -252,7 +256,7 @@ void app_main() {
         }
         setStep(target - currentStep);
         // setStep(atoi(buf));  //260 // 350ステップ 20
-        printf("Step state is %d\n", atoi(buf));
+        printf("Step state is %d\n", msg.data[0]);
         delay_ms(10);
     }
 }

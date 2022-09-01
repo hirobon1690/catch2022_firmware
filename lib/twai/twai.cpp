@@ -42,5 +42,5 @@ void _twai::write(twai_message_t* msg) {
 }
 
 void _twai::read(twai_message_t* msg){
-    twai_receive(msg, pdMS_TO_TICKS(10000));
+    twai_receive(msg, portMAX_DELAY);
 }

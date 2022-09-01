@@ -11,5 +11,5 @@ class tof{
     private:
     const int ADDR=0x52;
     PinName devicePin;
-    gpio select;
+    gpio& select;
 };
