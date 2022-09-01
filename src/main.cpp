@@ -27,10 +27,10 @@ void app_main(void);
 gpio dir(E05, OUTPUT);
 gpio slp(E04, OUTPUT);
 gpio stp(P18, OUTPUT);
-gpio pmp0(P18, OUTPUT);
-gpio pmp1(P19, OUTPUT);
-gpio vlv0(P27, OUTPUT);
-gpio vlv1(P26,OUTPUT);
+gpio pmp0(Pe1A, OUTPUT);
+gpio pmp1(Pe1B, OUTPUT);
+gpio vlv0(Pe1C, OUTPUT);
+gpio vlv1(Pe1D,OUTPUT);
 
 // Ticker ticker;
 int stepCnt = 0;
