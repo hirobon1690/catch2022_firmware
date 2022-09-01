@@ -54,8 +54,8 @@ adc pot0(A2);
 adc pot1(A3);
 arm a0(m0, s00, s01, pot0, 250);
 arm a1(m1, s10, s11, pot1, 276);
-KRA_PID pid0((float)pidPeriod / 1000, 0, 250, 0, 30, 0.4);
-KRA_PID pid1((float)pidPeriod / 1000, 0, 276, 0, 40, 0.4);
+KRA_PID pid0((float)pidPeriod / 1000, 0, 250, 0, 15, 0.4);
+KRA_PID pid1((float)pidPeriod / 1000, 0, 276, 0, 15, 0.4);
 
 Ticker ticker0;
 Ticker ticker1;
@@ -69,7 +69,7 @@ int unpackInt(char* buf, int index) {
 }
 
 void turnPmp(bool val) {
-    for (int i = 0; i < 2; i++) {
+    for (int i = 0; i < 1; i++) {
         pmp[i].write(val);
         vlv[i].write(val);
     }
@@ -108,11 +108,11 @@ void receiveUart(void* pvParameters) {
 void sendTwai(void* pvParameters) {
     while (1) {
         unsigned char twai_msg_tx[5];
-        twai_msg_tx[0]=stepper_state;
-        // *(float*)(msg.data + 1) = servo_angle;
+        *(float*)(twai_msg_tx) = servo_angle;
+        twai_msg_tx[4]=stepper_state;
         // printf("%d\n",stepper_state);
         twai.write(0x00,twai_msg_tx,5);
-        delay_ms(100);
+        delay_ms(10);
     }
 }
 
