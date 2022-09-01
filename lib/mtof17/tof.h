@@ -2,6 +2,7 @@
 #include "i2c.h"
 #include "gpio.h"
 #include "PinNames.h"
+#include "commonfunc.h"
 
 class tof{
     public:
