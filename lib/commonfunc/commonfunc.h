@@ -1,7 +1,7 @@
 #pragma once
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
-#include "gpioex.h"
+#include "pca9557.h"
 #include "i2c.h"
 #include "twai.h"
 #include "uart.h"
