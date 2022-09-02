@@ -176,10 +176,7 @@ void adConvert(void* pvParameters) {
 int rawData[2] = {0, 0};
 
 void app_main() {
-    i2c.init();
-    ex.set();
-    uart.init();
-    twai.init();
+    init();
     int result[2];
     currentDeg[0] = pot0.readAvrg(10);
     delay_ms(5);
