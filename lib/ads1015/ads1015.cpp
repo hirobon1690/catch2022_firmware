@@ -1,9 +1,9 @@
 #pragma once
 #include "ads1015.h"
+#include "commonfunc.h"
 
 adc::adc(pins _pin):pin((int)_pin){
-    conf[1]|=(pin<<4);
-    printf("%d",conf[1]);
+    this->conf[1]|=(pin<<4);
 }
 
 void adc::init(){

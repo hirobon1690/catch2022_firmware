@@ -27,6 +27,8 @@ void delay_ms(int ms) {
     vTaskDelay(ms / portTICK_RATE_MS);
 }
 
+int rawData[2] = {0, 0};
+
 void app_main() {
     i2c.init();
     ex.set();
@@ -43,6 +45,9 @@ void app_main() {
     // tof tof1(pin2);
     // tof tof2(Pe2D);
 
+    ticker0.attach_ms(pidPeriod,calPID);
+    // ticker1.attach_ms(pidPeriod,calA1PID);
+    xTaskCreatePinnedToCore(receiveUart, "receiveUart", 4096, NULL, 22, &taskHandle, 0);
     while (1) {
         // pin0.flip();
         // pin1.flip();

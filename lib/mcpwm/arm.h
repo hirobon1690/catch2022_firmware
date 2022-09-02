@@ -7,8 +7,9 @@
 class arm {
    public:
     arm(motor& _motor, gpio& _s0, gpio& _s1, adc& _pot, int _max);
-    void home(float speed);
+    void home(float speed,int min=0,int max=0);
     float getDeg();
+    float calDeg(int);
 
    private:
     motor& m0;
