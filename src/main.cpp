@@ -50,8 +50,8 @@ gpio s11(Pe2B, INPUT_PU);
 gpio user(USER, INPUT_PU);
 gpio pmp[2] = {gpio(Pe0A, OUTPUT), gpio(Pe0B, OUTPUT)};
 gpio vlv[2] = {gpio(Pe0C, OUTPUT), gpio(Pe0D, OUTPUT)};
-adc pot0(A2);
-adc pot1(A3);
+adc pot0(A3);
+adc pot1(A2);
 arm a0(m0, s00, s01, pot0, 250);
 arm a1(m1, s10, s11, pot1, 276);
 KRA_PID pid0((float)pidPeriod / 1000, 0, 250, 0, 15, 0.4);
@@ -71,7 +71,7 @@ int unpackInt(char* buf, int index) {
 void turnPmp(bool val) {
     for (int i = 0; i <= 1; i++) {
         pmp[i].write(val);
-        vlv[i].write(val);
+        vlv[i].write(!val);
     }
 }
 
@@ -117,7 +117,7 @@ void sendTwai(void* pvParameters) {
 }
 
 void calPID() {
-    printf("%3.2f, %3.2f, %d, %d, %f, %f\n", a0.calDeg(currentDeg[0]), a1.calDeg(currentDeg[1]), currentDeg[0], currentDeg[1], m0.duty, m1.duty);
+    // printf("%3.2f, %3.2f, %d, %d, %f, %f\n", a0.calDeg(currentDeg[0]), a1.calDeg(currentDeg[1]), currentDeg[0], currentDeg[1], m0.duty, m1.duty);
     // xTaskNotify(taskHandle, 0, eNoAction);
     // float currentDeg[2] = {0, 0};
     // while (1) {
@@ -148,9 +148,9 @@ void adctest(void* pvParameters) {
 
 void adConvert(void* pvParameters) {
     while (1) {
-        newDeg[0] = pot0.readAvrg(10);
+        newDeg[0] = pot0.read();
         delay_ms(5);
-        newDeg[1] = pot1.readAvrg(10);
+        newDeg[1] = pot1.read();
         delay_ms(5);
         if (abs(currentDeg[0] - newDeg[0]) < 50) {
             currentDeg[0] = newDeg[0];
@@ -182,9 +182,9 @@ void app_main() {
     // printf("init\nPress USER to start\n");
 
     while (1) {
-        int a=pot1.read();
-        int b=0;
-        printf("%d, %d\n",a,b);
+        int a=pot0.read();
+        int b=pot1.read();
+        // printf("%d, %d\n",a,b);
         if (!user.read()) {
             break;
         }
@@ -222,8 +222,8 @@ void app_main() {
     ticker0.attach_ms(pidPeriod, calPID);
 
     // ticker1.attach_ms(pidPeriod,calA1PID);
-    // xTaskCreatePinnedToCore(sendTwai, "sendTwai", 2048, NULL, 21, &taskHandle, 0);
-    // xTaskCreatePinnedToCore(receiveUart, "receiveUart", 4096, NULL, 22, &taskHandle, 0);
+    xTaskCreatePinnedToCore(sendTwai, "sendTwai", 2048, NULL, 21, &taskHandle, 0);
+    xTaskCreatePinnedToCore(receiveUart, "receiveUart", 4096, NULL, 22, &taskHandle, 0);
     // xTaskCreatePinnedToCore(adctest, "adctest", 4096, NULL, 23, &taskHandle, 1);
     xTaskCreatePinnedToCore(adConvert, "adConvert", 2048, NULL, 22, &taskHandle, 1);
     while (1) {
