@@ -48,8 +48,8 @@ gpio s01(Pe1D, INPUT_PU);
 gpio s10(Pe2A, INPUT_PU);
 gpio s11(Pe2B, INPUT_PU);
 gpio user(USER, INPUT_PU);
-gpio pmp[2] = {gpio(Pe1A, OUTPUT), gpio(Pe1B, OUTPUT)};
-gpio vlv[2] = {gpio(Pe1C, OUTPUT), gpio(Pe1D, OUTPUT)};
+gpio pmp[2] = {gpio(Pe0A, OUTPUT), gpio(Pe0B, OUTPUT)};
+gpio vlv[2] = {gpio(Pe0C, OUTPUT), gpio(Pe0D, OUTPUT)};
 adc pot0(A2);
 adc pot1(A3);
 arm a0(m0, s00, s01, pot0, 250);
@@ -69,7 +69,7 @@ int unpackInt(char* buf, int index) {
 }
 
 void turnPmp(bool val) {
-    for (int i = 0; i < 1; i++) {
+    for (int i = 0; i <= 1; i++) {
         pmp[i].write(val);
         vlv[i].write(val);
     }
@@ -109,15 +109,15 @@ void sendTwai(void* pvParameters) {
     while (1) {
         unsigned char twai_msg_tx[5];
         *(float*)(twai_msg_tx) = servo_angle;
-        twai_msg_tx[4]=stepper_state;
+        twai_msg_tx[4] = stepper_state;
         // printf("%d\n",stepper_state);
-        twai.write(0x00,twai_msg_tx,5);
+        twai.write(0x00, twai_msg_tx, 5);
         delay_ms(10);
     }
 }
 
 void calPID() {
-    // printf("%3.2f, %3.2f, %d, %d, %f, %f\n", a0.calDeg(currentDeg[0]), a1.calDeg(currentDeg[1]), currentDeg[0], currentDeg[1], m0.duty, m1.duty);
+    printf("%3.2f, %3.2f, %d, %d, %f, %f\n", a0.calDeg(currentDeg[0]), a1.calDeg(currentDeg[1]), currentDeg[0], currentDeg[1], m0.duty, m1.duty);
     // xTaskNotify(taskHandle, 0, eNoAction);
     // float currentDeg[2] = {0, 0};
     // while (1) {
@@ -169,7 +169,7 @@ void adConvert(void* pvParameters) {
         // }
         // preDeg[0]=currentDeg[0];
         // preDeg[1]=currentDeg[1];
-        delay_ms(5);
+        // delay_ms(5);
     }
 }
 
@@ -178,17 +178,20 @@ int rawData[2] = {0, 0};
 void app_main() {
     init();
     int result[2];
-    currentDeg[0] = pot0.readAvrg(10);
-    delay_ms(5);
-    currentDeg[1] = pot1.readAvrg(10);
-    delay_ms(5);
+
     // printf("init\nPress USER to start\n");
+
     while (1) {
+        int a=pot1.read();
+        int b=0;
+        printf("%d, %d\n",a,b);
         if (!user.read()) {
             break;
         }
-        delay_ms(10);
+        delay_ms(50);
     }
+    currentDeg[0]=pot0.readAvrg(10);
+    currentDeg[1]=pot1.readAvrg(10);
     pid0.setgain(10, 0, 0);
     pid1.setgain(10, 0, 0);
     // m0.write(-10);
@@ -209,7 +212,7 @@ void app_main() {
     pot0.readAvrg(100);
     pot1.readAvrg(100);
     // a0.home(15);
-    a0.home(0, 900, 94);
+    a0.home(0, 800, 21);
     // a1.home(30);
     a1.home(0, 140, 1040);
     // a0.home(15);
@@ -219,8 +222,8 @@ void app_main() {
     ticker0.attach_ms(pidPeriod, calPID);
 
     // ticker1.attach_ms(pidPeriod,calA1PID);
-    xTaskCreatePinnedToCore(sendTwai, "sendTwai", 2048, NULL, 21, &taskHandle, 0);
-    xTaskCreatePinnedToCore(receiveUart, "receiveUart", 4096, NULL, 22, &taskHandle, 0);
+    // xTaskCreatePinnedToCore(sendTwai, "sendTwai", 2048, NULL, 21, &taskHandle, 0);
+    // xTaskCreatePinnedToCore(receiveUart, "receiveUart", 4096, NULL, 22, &taskHandle, 0);
     // xTaskCreatePinnedToCore(adctest, "adctest", 4096, NULL, 23, &taskHandle, 1);
     xTaskCreatePinnedToCore(adConvert, "adConvert", 2048, NULL, 22, &taskHandle, 1);
     while (1) {

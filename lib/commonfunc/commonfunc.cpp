@@ -19,7 +19,7 @@ void init() {
     uart.init();
     gpio_config_t conf = {
         .pin_bit_mask = (0b11ULL << 12),       /*!< GPIO pin: set with bit mask, each bit maps to a GPIO */
-        .mode = GPIO_MODE_DISABLE,             /*!< GPIO mode: set input/output mode                     */
+        .mode = GPIO_MODE_OUTPUT,             /*!< GPIO mode: set input/output mode                     */
         .pull_up_en = GPIO_PULLUP_DISABLE,     /*!< GPIO pull-up                                         */
         .pull_down_en = GPIO_PULLDOWN_DISABLE, /*!< GPIO pull-down                                       */
         // .intr_type = gpiohal.dev->pin[pin].int_type  /*!< GPIO interrupt type - previously set                 */
