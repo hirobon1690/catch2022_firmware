@@ -18,6 +18,7 @@
 #include "stepper.h"
 #include "tof.h"
 #include "uart.h"
+#include "vl53l0x.h"
 
 extern "C" {
 void app_main(void);
