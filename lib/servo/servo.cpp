@@ -25,7 +25,7 @@ servo::servo(PinName pin, int min, int max) {
 void servo::write(float angle) {
     // uint32_t duty=(int)(0.000001*angle*angle*angle-0.0008*angle*angle+1.2481*angle+104);
     // uint32_t duty=(int)(-0.00004*angle*angle+1.1228*angle+110); //2次近似
-    uint32_t duty=(int)(-0.0000004*angle*angle*angle+0.00003*angle*angle+1.1731*angle+102); //3次近似
+    uint32_t duty=(int)(-3E-06*angle*angle*angle + 0.0017*angle*angle + 0.8743*angle + 99.333); //3次近似
 
     ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, duty);
     ledc_update_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0);
