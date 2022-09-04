@@ -1,4 +1,0 @@
-[submodule "lib/ESP32-VL53L0X"]
-	path = lib/ESP32-VL53L0X
-	url = https://github.com/revk/ESP32-VL53L0X.git
-	ignore = all
