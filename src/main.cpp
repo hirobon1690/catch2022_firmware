@@ -12,6 +12,7 @@
 #include "KRA_PID.h"
 #include "PinNames.h"
 #include "Ticker.h"
+#include "VL53L0X.h"
 #include "ads1015.h"
 #include "arm.h"
 #include "commonfunc.h"
@@ -57,6 +58,8 @@ servo servo0(Pe2B, 0, 360);
 gpio s10(Pe2C, INPUT_PU);
 gpio s11(Pe2D, INPUT_PU);
 gpio user(USER, INPUT_PU);
+VL53L0X tof[2];
+gpio sensor[2]={gpio(Pe1A,OUTPUT),gpio(Pe1C,OUTPUT)};
 
 bool prevVal = 0;
 int targetStep = 0;
@@ -201,7 +204,23 @@ void homeStp() {
     currentStep = 0;
 }
 
+void initSensor(){
+    sensor[0].write(1);
+    sensor[1].write(0);
+    tof[0].init();
+    tof[1].init();
+    tof[0].setAddress(0x30);
+    sensor[1].write(1);
+}
+
 void calPID() {
+}
+
+int measure(){
+    int result[2];
+    result[0]=tof[0].readRangeSingleMillimeters();
+    result[1]=tof[1].readRangeSingleMillimeters();
+    return result[1]<<1|result[0];
 }
 
 void app_main() {
@@ -257,6 +276,9 @@ void app_main() {
         setStep(target - currentStep);
         // setStep(atoi(buf));  //260 // 350ステップ 20
         printf("Step state is %d\n", msg.data[0]);
+        unsigned char twai_tx[1]={0};
+        twai_tx[0]=(unsigned char)measure();
+        twai.write(0x00,twai_tx,1);
         delay_ms(10);
     }
 }
