@@ -46,6 +46,7 @@ int currentStep = 0;
 const int minSpeed = 6000;
 const int acceralationLimit = 400;
 
+const int DIST=60;
 const int stpPeriod = 50;
 
 Ticker ticker0;
@@ -220,7 +221,7 @@ int measure(){
     int result[2];
     result[0]=tof[0].readRangeSingleMillimeters();
     result[1]=tof[1].readRangeSingleMillimeters();
-    return result[1]<<1|result[0];
+    return (result[1]<=DIST)<<1|(result[0]<=DIST);
 }
 
 void app_main() {
