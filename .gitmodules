@@ -1,0 +1,3 @@
+[submodule "lib/vl53l0x-arduino"]
+	path = lib/vl53l0x-arduino
+	url = https://github.com/pololu/vl53l0x-arduino.git
