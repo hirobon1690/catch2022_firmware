@@ -15,10 +15,10 @@
 #define ADDRESS_DEFAULT 0b0101001
 
 // Record the current time to check an upcoming timeout against
-#define startTimeout() (timeout_start_ms = esp_timer_get_time())
+#define startTimeout() (timeout_start_ms = esp_timer_get_time()/1000)
 
 // Check if timeout is enabled (set to nonzero value) and has expired
-#define checkTimeoutExpired() (io_timeout > 0 && ((uint16_t)(esp_timer_get_time() - timeout_start_ms) > io_timeout))
+#define checkTimeoutExpired() (io_timeout > 0 && ((uint16_t)(esp_timer_get_time()/1000 - timeout_start_ms) > io_timeout))
 
 // Decode VCSEL (vertical cavity surface emitting laser) pulse period in PCLKs
 // from register value
