@@ -125,7 +125,7 @@ void receiveTwai(void* pvParameters) {
 }
 
 void calPID() {
-    // printf("%3.2f, %3.2f, %d, %d, %f, %f\n", a0.calDeg(currentDeg[0]), a1.calDeg(currentDeg[1]), currentDeg[0], currentDeg[1], m0.duty, m1.duty);
+    printf("%3.2f, %3.2f, %d, %d, %f, %f\n", a0.calDeg(currentDeg[0]), a1.calDeg(currentDeg[1]), currentDeg[0], currentDeg[1], m0.duty, m1.duty);
     // xTaskNotify(taskHandle, 0, eNoAction);
     // float currentDeg[2] = {0, 0};
     // while (1) {
@@ -185,21 +185,23 @@ int rawData[2] = {0, 0};
 
 void app_main() {
     init();
+    m0.write(0);
+    m1.write(0);
     int result[2];
 
     // printf("init\nPress USER to start\n");
-
+    // m1.write(-10);
     while (1) {
         int a = pot0.read();
         int b = pot1.read();
-        // printf("%d, %d\n",a,b);
+        printf("%d, %d\n",a,b);
         if (!user.read()) {
             break;
         }
         delay_ms(50);
     }
-    currentDeg[0] = pot0.readAvrg(10);
-    currentDeg[1] = pot1.readAvrg(10);
+    currentDeg[0] = pot0.read();
+    currentDeg[1] = pot1.read();
     pid0.setgain(10, 0, 0);
     pid1.setgain(10, 0, 0);
     // m0.write(-10);
@@ -220,7 +222,7 @@ void app_main() {
     pot0.readAvrg(100);
     pot1.readAvrg(100);
     // a0.home(15);
-    a0.home(0, 800, 21);
+    a0.home(0, 1338, 35);
     // a1.home(30);
     a1.home(0, 140, 1040);
     // a0.home(15);
@@ -231,7 +233,7 @@ void app_main() {
 
     // ticker1.attach_ms(pidPeriod,calA1PID);
     xTaskCreatePinnedToCore(sendTwai, "sendTwai", 2048, NULL, 21, &taskHandle, 0);
-    xTaskCreatePinnedToCore(receiveUart, "receiveUart", 4096, NULL, 22, &taskHandle, 0);
+    // xTaskCreatePinnedToCore(receiveUart, "receiveUart", 4096, NULL, 22, &taskHandle, 0);
     xTaskCreatePinnedToCore(receiveUart, "receiveTwai", 4096, NULL, 23, &taskHandle, 0);
     // xTaskCreatePinnedToCore(adctest, "adctest", 4096, NULL, 23, &taskHandle, 1);
     xTaskCreatePinnedToCore(adConvert, "adConvert", 2048, NULL, 22, &taskHandle, 1);
