@@ -60,7 +60,7 @@ gpio s10(Pe2C, INPUT_PU);
 gpio s11(Pe2D, INPUT_PU);
 gpio user(USER, INPUT_PU);
 VL53L0X tof[2];
-gpio sensor[2]={gpio(Pe0A,OUTPUT),gpio(Pe0C,OUTPUT)};
+gpio sensor[2]={gpio(Pe1A,OUTPUT),gpio(Pe1C,OUTPUT)};
 
 bool prevVal = 0;
 int targetStep = 0;
