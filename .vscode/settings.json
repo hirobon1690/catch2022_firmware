@@ -3,5 +3,6 @@
         "*.ipp": "cpp",
         "thread": "cpp",
         "*.tcc": "cpp"
-    }
+    },
+    "ros.distro": "noetic"
 }
