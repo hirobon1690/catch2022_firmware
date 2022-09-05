@@ -27,8 +27,8 @@ VL53L0X sensor1;
 extern "C" {
 void app_main(void);
 }
-gpio pin0(Pe2A, OUTPUT);
-gpio pin1(Pe2C, OUTPUT);
+gpio pin0(Pe1A, OUTPUT);
+gpio pin1(Pe1C, OUTPUT);
 void app_main() {
     /* initialization */
     i2c.init();
