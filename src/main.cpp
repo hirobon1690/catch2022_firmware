@@ -46,7 +46,7 @@ int currentStep = 0;
 const int minSpeed = 6000;
 const int acceralationLimit = 400;
 
-const int DIST=60;
+const int DIST = 60;
 const int stpPeriod = 50;
 
 Ticker ticker0;
@@ -60,7 +60,7 @@ gpio s10(Pe2C, INPUT_PU);
 gpio s11(Pe2D, INPUT_PU);
 gpio user(USER, INPUT_PU);
 VL53L0X tof[2];
-gpio sensor[2]={gpio(Pe1A,OUTPUT),gpio(Pe1C,OUTPUT)};
+gpio sensor[2] = {gpio(Pe1A, OUTPUT), gpio(Pe1C, OUTPUT)};
 
 bool prevVal = 0;
 int targetStep = 0;
@@ -205,38 +205,41 @@ void homeStp() {
     currentStep = 0;
 }
 
-void initSensor(){
+void initSensor() {
     sensor[0].write(1);
     sensor[1].write(0);
-    tof[0].init();
+    if (!tof[0].init()) {
+        printf("Failed to detect and initialize sensor!\n");
+    }
     tof[0].setAddress(0x30);
     sensor[1].write(1);
-    tof[1].init();
+    if (!tof[1].init()) {
+        printf("Failed to detect and initialize sensor!\n");
+    }
 }
 
 void calPID() {
 }
 
-int measure(){
+int measure() {
     int result[2];
-    result[0]=tof[0].readRangeSingleMillimeters();
-    result[1]=tof[1].readRangeSingleMillimeters();
-    return (result[1]<=DIST)<<1|(result[0]<=DIST);
+    result[0] = tof[0].readRangeSingleMillimeters();
+    result[1] = tof[1].readRangeSingleMillimeters();
+    return (result[1] <= DIST) << 1 | (result[0] <= DIST);
 }
 
 void app_main() {
-    i2c.init();
-    ex.set();
-    uart.init();
-    twai.init();
+    init();
+    initSensor();
     slp.write(1);
     ticker0.attach_us(stpPeriod, step);
     // stepCycle=8000;
     // while (1) {
     //     delay_ms(10);
     // }
-    while(1){
-        printf("%d, %d\n",tof[0].readRangeSingleMillimeters(),tof[1].readRangeSingleMillimeters());
+
+    while (1) {
+        printf("%d\n", measure());
         delay_ms(50);
     }
     homeStp();
@@ -281,9 +284,9 @@ void app_main() {
         setStep(target - currentStep);
         // setStep(atoi(buf));  //260 // 350ステップ 20
         printf("Step state is %d\n", msg.data[0]);
-        unsigned char twai_tx[1]={0};
-        twai_tx[0]=(unsigned char)measure();
-        twai.write(0x00,twai_tx,1);
+        unsigned char twai_tx[1] = {0};
+        twai_tx[0] = (unsigned char)measure();
+        twai.write(0x00, twai_tx, 1);
         delay_ms(10);
     }
 }
