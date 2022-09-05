@@ -31,7 +31,8 @@ gpio pin0(Pe1A, OUTPUT);
 gpio pin1(Pe1C, OUTPUT);
 void app_main() {
     /* initialization */
-    i2c.init();
+    // i2c.init();
+    init();
     pin0.write(1);
     sensor.init();
     sensor.setAddress(0x30);

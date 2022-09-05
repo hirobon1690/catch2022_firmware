@@ -28,5 +28,7 @@ void init() {
         .pull_down_en = GPIO_PULLDOWN_DISABLE, /*!< GPIO pull-down                                       */
         // .intr_type = gpiohal.dev->pin[pin].int_type  /*!< GPIO interrupt type - previously set                 */
     };
+    conf.pin_bit_mask|=1ULL<<(int)Pe1A;
+    conf.pin_bit_mask|=1ULL<<(int)Pe1C;
     gpio_config(&conf);
 }
