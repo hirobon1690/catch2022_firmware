@@ -222,9 +222,9 @@ void app_main() {
     pot0.readAvrg(100);
     pot1.readAvrg(100);
     // a0.home(15);
-    a0.home(0, 1338, 35);
+    a0.home(0, 1465, 130);
     // a1.home(30);
-    a1.home(0, 140, 1040);
+    a1.home(0, 92, 1090);
     // a0.home(15);
     // a1home();
     pid0.setgoal(125);
