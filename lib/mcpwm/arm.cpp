@@ -43,6 +43,6 @@ float arm::getDeg() {
     return max * (float)raw / (rawData[0] - rawData[1]) + (float)rawData[1] * max / (rawData[1] - rawData[0]);
 }
 
-float arm::calDeg(int raw) {
+int arm::calDeg(int raw) {
     return max * (float)raw / (rawData[0] - rawData[1]) + (float)rawData[1] * max / (rawData[1] - rawData[0]);
 }

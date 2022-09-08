@@ -1,3 +1,5 @@
+// #define DEBUG
+
 #include <driver/gpio.h>
 #include <driver/i2c.h>
 #include <driver/mcpwm.h>
@@ -38,7 +40,7 @@ int emergency;
 int currentDeg[2] = {0, 0};
 int preDeg[2] = {0, 0};
 int newDeg[2] = {0, 0};
-bool is_grabbed = 0;
+char is_grabbed = 0;
 const int pidPeriod = 10;
 
 motor m0(Pe1A, MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM0A, E01, E04);
@@ -54,8 +56,8 @@ adc pot0(A3);
 adc pot1(A2);
 arm a0(m0, s00, s01, pot0, 250);
 arm a1(m1, s10, s11, pot1, 276);
-KRA_PID pid0((float)pidPeriod / 1000, 0, 250, 0, 15, 0.4);
-KRA_PID pid1((float)pidPeriod / 1000, 0, 276, 0, 15, 0.4);
+KRA_PID pid0((float)pidPeriod / 1000, 0, 250, 0, 30, 0.4);
+KRA_PID pid1((float)pidPeriod / 1000, 0, 276, 0, 30, 0.4);
 
 Ticker ticker0;
 Ticker ticker1;
@@ -79,7 +81,7 @@ void receiveUart(void* pvParameters) {
     while (1) {
         *(float*)uart_msg_tx = a0.calDeg(currentDeg[0]);
         *(float*)(uart_msg_tx + 4) = a1.calDeg(currentDeg[1]);
-        *(bool*)(uart_msg_tx + 9) = is_grabbed;
+        uart_msg_tx[8] = is_grabbed;
         uart_write_bytes(UART_NUM_0, uart_msg_tx, 11);
         uart_read_bytes(UART_NUM_0, uart_msg, 16, portMAX_DELAY);
         if (uart_msg[15] != 0xFF) {
@@ -92,16 +94,17 @@ void receiveUart(void* pvParameters) {
                 }
             }
         }
+        // printf("%d\n",is_grabbed);
         move_cmd[0] = unpackFloat(uart_msg, 0);
         move_cmd[1] = unpackFloat(uart_msg, 4);
         pid0.setgoal(move_cmd[0]);
         pid1.setgoal(move_cmd[1]);
         servo_angle = unpackFloat(uart_msg, 8);
         stepper_state = unpackInt(uart_msg, 12);
-        // turnPmp(stepper_state);
         pmp_state = (bool)unpackInt(uart_msg, 13);
         turnPmp(pmp_state);
         emergency = unpackInt(uart_msg, 14);
+        delay_ms(1);
     }
 }
 
@@ -121,11 +124,15 @@ void receiveTwai(void* pvParameters) {
         twai_message_t msg;
         twai.read(&msg);
         is_grabbed = msg.data[0];
+        // printf("%d\n",is_grabbed);
+        delay_ms(10);
     }
 }
 
 void calPID() {
-    printf("%3.2f, %3.2f, %d, %d, %f, %f\n", a0.calDeg(currentDeg[0]), a1.calDeg(currentDeg[1]), currentDeg[0], currentDeg[1], m0.duty, m1.duty);
+    #ifdef DEBUG
+    printf("%3d, %3d, %d, %d, %f, %f\n", a0.calDeg(currentDeg[0]), a1.calDeg(currentDeg[1]), currentDeg[0], currentDeg[1], m0.duty, m1.duty);
+    #endif
     // xTaskNotify(taskHandle, 0, eNoAction);
     // float currentDeg[2] = {0, 0};
     // while (1) {
@@ -134,8 +141,19 @@ void calPID() {
     // currentDeg[1] = a1.getDeg();
     // delay_ms(2);
     // m0.write(pid0.calPID(currentDeg[0]));
-    m0.write(pid0.calPID(a0.calDeg(currentDeg[0])));
-    m1.write(pid1.calPID(a1.calDeg(currentDeg[1])));
+    int duty[2];
+    duty[0]=pid0.calPID(a0.calDeg(currentDeg[0]));
+    duty[1]=pid1.calPID(a1.calDeg(currentDeg[1]));
+    if(pid0.judgePID()){
+        m0.write(0);
+    }else{
+        m0.write(duty[0]);
+    }
+    if(pid1.judgePID()){
+        m1.write(0);
+    }else{
+        m1.write(duty[1]);
+    }
     // printf("%f, %f\n", currentDeg[0], currentDeg[1]);
     // delay_ms(8);
     // }
@@ -187,6 +205,7 @@ void app_main() {
     init();
     m0.write(0);
     m1.write(0);
+    turnPmp(0);
     int result[2];
 
     // printf("init\nPress USER to start\n");
@@ -194,7 +213,9 @@ void app_main() {
     while (1) {
         int a = pot0.read();
         int b = pot1.read();
+        #ifdef DEBUG
         printf("%d, %d\n",a,b);
+        #endif
         if (!user.read()) {
             break;
         }
@@ -202,8 +223,8 @@ void app_main() {
     }
     currentDeg[0] = pot0.read();
     currentDeg[1] = pot1.read();
-    pid0.setgain(10, 0, 0);
-    pid1.setgain(10, 0, 0);
+    pid0.setgain(6, 0.15, 0.7);
+    pid1.setgain(6, 0.3, 0.7);
     // m0.write(-10);
     // m1.write(10);
     // while (1) {
@@ -222,19 +243,21 @@ void app_main() {
     pot0.readAvrg(100);
     pot1.readAvrg(100);
     // a0.home(15);
-    a0.home(0, 1338, 35);
+    a0.home(0, 1468, 126);
     // a1.home(30);
-    a1.home(0, 140, 1040);
+    a1.home(0, 47, 1260);
     // a0.home(15);
     // a1home();
+
+    ticker0.attach_ms(pidPeriod, calPID);
     pid0.setgoal(125);
     pid1.setgoal(138);
-    ticker0.attach_ms(pidPeriod, calPID);
-
     // ticker1.attach_ms(pidPeriod,calA1PID);
     xTaskCreatePinnedToCore(sendTwai, "sendTwai", 2048, NULL, 21, &taskHandle, 0);
-    // xTaskCreatePinnedToCore(receiveUart, "receiveUart", 4096, NULL, 22, &taskHandle, 0);
-    xTaskCreatePinnedToCore(receiveUart, "receiveTwai", 4096, NULL, 23, &taskHandle, 0);
+    #ifndef DEBUG
+    xTaskCreatePinnedToCore(receiveUart, "receiveUart", 4096, NULL, 22, &taskHandle, 0);
+    #endif
+    xTaskCreatePinnedToCore(receiveTwai, "receiveTwai", 4096, NULL, 23, &taskHandle, 0);
     // xTaskCreatePinnedToCore(adctest, "adctest", 4096, NULL, 23, &taskHandle, 1);
     xTaskCreatePinnedToCore(adConvert, "adConvert", 2048, NULL, 22, &taskHandle, 1);
     while (1) {

@@ -83,7 +83,7 @@ float KRA_PID::calPID(float argument) {
 }
 
 bool KRA_PID::judgePID() {
-    if (abs(Prev_E) < 0.01) {
+    if (abs(Prev_E) < 0.001) {
         return true;
     } else {
         return false;
