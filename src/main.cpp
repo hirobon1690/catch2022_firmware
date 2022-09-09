@@ -46,7 +46,7 @@ int currentStep = 0;
 const int minSpeed = 6000;
 const int acceralationLimit = 400;
 
-const int DIST = 60;
+const int DIST = 70;
 const int stpPeriod = 50;
 
 Ticker ticker0;
@@ -187,7 +187,7 @@ void homeStp() {
     dir.write(1);
     stepCycle = 5000;
     while (1) {
-        if (!user.read()) {
+        if (!s11.read()) {
             break;
         }
         delay_ms(1);
@@ -196,7 +196,7 @@ void homeStp() {
     dir.write(0);
     stepCycle = 5000;
     while (1) {
-        if (!user.read()) {
+        if (!s10.read()) {
             break;
         }
         delay_ms(1);
@@ -232,18 +232,13 @@ void app_main() {
     init();
     initSensor();
     slp.write(1);
+    disableCore0WDT();
     ticker0.attach_us(stpPeriod, step);
     // stepCycle=8000;
     // while (1) {
     //     delay_ms(10);
     // }
-
-    while (1) {
-        printf("%d\n", measure());
-        delay_ms(50);
-    }
     homeStp();
-    disableCore0WDT();
 
     // ticker1.attach_ms(pidPeriod,calA1PID);
     // xTaskCreatePinnedToCore(receiveTwai, "receiveTwai", 4096, NULL, 22, &taskHandle, 0);
@@ -263,9 +258,9 @@ void app_main() {
         twai_message_t msg;
         twai.read(&msg);
         int target = 0;
-        // float angle=unpackFloat((char*)(msg.data),1);
-        // servo0.write(angle);
-        switch (msg.data[0]) {
+        float angle=unpackFloat((char*)(msg.data),0);
+        servo0.write(angle);
+        switch (msg.data[4]) {
             case 0:
                 target = 0;
                 break;
@@ -283,10 +278,11 @@ void app_main() {
         }
         setStep(target - currentStep);
         // setStep(atoi(buf));  //260 // 350ステップ 20
-        printf("Step state is %d\n", msg.data[0]);
+        printf("Step state is %d\n", msg.data[4]);
         unsigned char twai_tx[1] = {0};
         twai_tx[0] = (unsigned char)measure();
         twai.write(0x00, twai_tx, 1);
+        printf("%d\n",twai_tx[0]);
         delay_ms(10);
     }
 }
