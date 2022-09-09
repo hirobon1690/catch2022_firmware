@@ -15,9 +15,11 @@
 #include "VL53L0X.h"
 #include "ads1015.h"
 #include "arm.h"
+#include "buzzer.h"
 #include "commonfunc.h"
 #include "gpio.h"
 #include "i2c.h"
+#include "led.h"
 #include "mcpwm.h"
 #include "motor.h"
 #include "pca9557.h"
@@ -25,8 +27,6 @@
 #include "tof.h"
 #include "twai.h"
 #include "uart.h"
-#include "led.h"
-#include "buzzer.h"
 
 extern "C" {
 void app_main(void);
@@ -63,6 +63,9 @@ gpio s11(Pe2D, INPUT_PU);
 gpio user(USER, INPUT_PU);
 VL53L0X tof[2];
 gpio sensor[2] = {gpio(Pe1A, OUTPUT), gpio(Pe1C, OUTPUT)};
+
+RGBLED led(Pe0A, Pe0B, Pe0C);
+buzzer bu(Pe0D);
 
 bool prevVal = 0;
 int targetStep = 0;
@@ -223,6 +226,16 @@ void initSensor() {
 void calPID() {
 }
 
+void stripLed(void* pvParameters) {
+    while (1) {
+        for (int deg = 0; deg < 360; deg++) {
+            led.writeHSV(deg, 255, 255);
+            printf("%d\n", deg);
+            delay_ms(10);
+        }
+    }
+}
+
 int measure() {
     int result[2];
     result[0] = tof[0].readRangeSingleMillimeters();
@@ -232,18 +245,7 @@ int measure() {
 
 void app_main() {
     init();
-    RGBLED led(Pe0A,Pe0B,Pe0C);
-    buzzer bu(Pe0D);
     bu.buzz(2);
-    while(1){
-        // led.writeHSV(60,255,255);
-        // delay_ms(50);
-        for(int deg=0;deg<360;deg++){
-            led.writeHSV(deg,255,255);
-            printf("%d\n",deg);
-            delay_ms(10);
-        }
-    }
     // initSensor();
     slp.write(1);
     disableCore0WDT();
@@ -258,6 +260,7 @@ void app_main() {
     // xTaskCreatePinnedToCore(receiveTwai, "receiveTwai", 4096, NULL, 22, &taskHandle, 0);
     // xTaskCreatePinnedToCore(stepToTarget, "stepToTarget", 4096, NULL, 22, &taskHandle, 1);
     // xTaskCreatePinnedToCore(stepAc, "stepAc", 4096, NULL, 22, &taskHandle, 0);
+    xTaskCreatePinnedToCore(stripLed, "stripLed", 4096, NULL, 22, &taskHandle, 0);
     ticker1.attach_ms(1, stepAcc);
 
     // xTaskCreatePinnedToCore(printStep, "printStep", 4096, NULL, 21, &taskHandle, 0);
@@ -272,7 +275,7 @@ void app_main() {
         twai_message_t msg;
         twai.read(&msg);
         int target = 0;
-        float angle=unpackFloat((char*)(msg.data),0);
+        float angle = unpackFloat((char*)(msg.data), 0);
         servo0.write(angle);
         switch (msg.data[4]) {
             case 0:
@@ -296,7 +299,7 @@ void app_main() {
         unsigned char twai_tx[1] = {0};
         twai_tx[0] = (unsigned char)measure();
         twai.write(0x00, twai_tx, 1);
-        printf("%d\n",twai_tx[0]);
+        printf("%d\n", twai_tx[0]);
         delay_ms(10);
     }
 }
