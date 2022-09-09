@@ -25,6 +25,8 @@
 #include "tof.h"
 #include "twai.h"
 #include "uart.h"
+#include "led.h"
+#include "buzzer.h"
 
 extern "C" {
 void app_main(void);
@@ -230,7 +232,19 @@ int measure() {
 
 void app_main() {
     init();
-    initSensor();
+    RGBLED led(Pe0A,Pe0B,Pe0C);
+    buzzer bu(Pe0D);
+    bu.buzz(2);
+    while(1){
+        // led.writeHSV(60,255,255);
+        // delay_ms(50);
+        for(int deg=0;deg<360;deg++){
+            led.writeHSV(deg,255,255);
+            printf("%d\n",deg);
+            delay_ms(10);
+        }
+    }
+    // initSensor();
     slp.write(1);
     disableCore0WDT();
     ticker0.attach_us(stpPeriod, step);
