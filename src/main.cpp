@@ -242,10 +242,8 @@ void fadeLed() {
 
 void stripLed(void* pvParameters) {
     while (1) {
-        led.setHSV(0, 255, 255);
-        delay_ms(1000);
-        led.setHSV(360, 255, 255);
-        delay_ms(1000);
+        fadeLed();
+        delay_ms(5);
     }
 }
 
@@ -263,7 +261,7 @@ void app_main() {
     slp.write(1);
     disableCore0WDT();
     ticker0.attach_us(stpPeriod, step);
-    ticker2.attach_ms(5, fadeLed);
+    // ticker2.attach_ms(5, fadeLed);
     // led.writeRGB(255, 255, 255);
     // while (1) {
     //     char color[16];
@@ -289,7 +287,7 @@ void app_main() {
 
     // ticker1.attach_ms(pidPeriod,calA1PID);
     // xTaskCreatePinnedToCore(receiveTwai, "receiveTwai", 4096, NULL, 22, &taskHandle, 0);
-    // xTaskCreatePinnedToCore(stepToTarget, "stepToTarget", 4096, NULL, 22, &taskHandle, 1);
+    xTaskCreatePinnedToCore(stripLed, "ledTask", 4096, NULL, 22, &taskHandle, 1);
     // xTaskCreatePinnedToCore(stepAc, "stepAc", 4096, NULL, 22, &taskHandle, 0);
     ticker1.attach_ms(1, stepAcc);
     // xTaskCreatePinnedToCore(printStep, "printStep", 4096, NULL, 21, &taskHandle, 0);
@@ -328,13 +326,14 @@ void app_main() {
         printf("Step state is %d\n", msg.data[4]);
 
         led_hsv.hue = unpackShort((char*)(msg.data), 5);
-        led_hsv.saturation = (unsigned char)msg.data[6];
-        led_hsv.brightness = (unsigned char)msg.data[7];
+        led_hsv.saturation = (unsigned char)msg.data[7];
+        // led_hsv.brightness = (unsigned char)msg.data[8];
+        led_hsv.brightness = 255;
         led.setHSV(led_hsv.hue, led_hsv.saturation, led_hsv.brightness);
         unsigned char twai_tx[1] = {0};
         twai_tx[0] = (unsigned char)measure();
         twai.write(0x00, twai_tx, 1);
-        printf("%d\n", twai_tx[0]);
+        printf("%d, %d, %d\n", led_hsv.hue,led_hsv.saturation,led_hsv.brightness);
         delay_ms(10);
     }
 }
