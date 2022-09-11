@@ -42,6 +42,11 @@ int preDeg[2] = {0, 0};
 int newDeg[2] = {0, 0};
 char is_grabbed = 0;
 const int pidPeriod = 10;
+struct{
+    short hue;
+    unsigned char saturation;
+    unsigned char brightness;
+}led_hsv;
 
 motor m0(Pe1A, MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM0A, E01, E04);
 motor m1(Pe1B, MCPWM_UNIT_1, MCPWM_TIMER_1, MCPWM1A, E03, E02);
@@ -70,11 +75,15 @@ int unpackInt(char* buf, int index) {
     return *(buf + index);
 }
 
-void turnPmp(bool val) {
-    for (int i = 0; i <= 1; i++) {
-        pmp[i].write(val);
-        vlv[i].write(!val);
-    }
+short unpackShort(char* buf, int index) {
+    return *(short*)(buf + index);
+}
+
+void turnPmp(int val) {
+    pmp[0].write(val&1);
+    vlv[0].write(!(val&1));
+    pmp[1].write(val>>1);
+    vlv[1].write(!(val>>1));
 }
 
 void receiveUart(void* pvParameters) {
@@ -83,8 +92,8 @@ void receiveUart(void* pvParameters) {
         *(float*)(uart_msg_tx + 4) = a1.calDeg(currentDeg[1]);
         uart_msg_tx[8] = is_grabbed;
         uart_write_bytes(UART_NUM_0, uart_msg_tx, 11);
-        uart_read_bytes(UART_NUM_0, uart_msg, 16, portMAX_DELAY);
-        if (uart_msg[15] != 0xFF) {
+        uart_read_bytes(UART_NUM_0, uart_msg, 20, portMAX_DELAY);
+        if (uart_msg[19] != 0xFF) {
             printf("Connection Failed!\n");
             while (1) {
                 char buf[1];
@@ -101,20 +110,26 @@ void receiveUart(void* pvParameters) {
         pid1.setgoal(move_cmd[1]);
         servo_angle = unpackFloat(uart_msg, 8);
         stepper_state = unpackInt(uart_msg, 12);
-        pmp_state = (bool)unpackInt(uart_msg, 13);
+        pmp_state = unpackInt(uart_msg, 13);
         turnPmp(pmp_state);
         emergency = unpackInt(uart_msg, 14);
+        led_hsv.hue=unpackShort(uart_msg,15);
+        led_hsv.saturation=uart_msg[17];
+        led_hsv.brightness=uart_msg[18];
         delay_ms(1);
     }
 }
 
 void sendTwai(void* pvParameters) {
     while (1) {
-        unsigned char twai_msg_tx[5];
+        unsigned char twai_msg_tx[8];
         *(float*)(twai_msg_tx) = servo_angle;
         twai_msg_tx[4] = stepper_state;
-        // printf("%d\n",stepper_state);
-        twai.write(0x00, twai_msg_tx, 5);
+        *(short*)(twai_msg_tx+5)=led_hsv.hue;
+        twai_msg_tx[6]=led_hsv.saturation;
+        twai_msg_tx[7]=led_hsv.brightness;
+        printf("%d, %d, %d\n",led_hsv.hue,led_hsv.saturation,led_hsv.brightness);
+        twai.write(0x00, twai_msg_tx, 8);
         delay_ms(10);
     }
 }
