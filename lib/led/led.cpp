@@ -36,9 +36,9 @@ void RGBLED::writeRGB(int R, int G, int B) {
     rgb[0] = R;
     rgb[1] = G;
     rgb[2] = B;
-    R = 255 - R;
-    G = 255 - G;
-    B = 255 - B;
+    // R = 255 - R;
+    // G = 255 - G;
+    // B = 255 - B;
     ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_1, 1023 * R / 255);
     ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_2, 1023 * G / 255);
     ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_3, 1023 * B / 255);
@@ -47,37 +47,75 @@ void RGBLED::writeRGB(int R, int G, int B) {
     ledc_update_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_3);
 }
 
+void RGBLED::setRGB(int R, int G, int B) {
+    targetRgb[0] = R;
+    targetRgb[1] = G;
+    targetRgb[2] = B;
+}
+
+void RGBLED::fadeRGB() {
+    for (int i = 0; i < 3; i++) {
+        if (rgb[i] < targetRgb[i]) {
+            rgb[i]++;
+        } else if (rgb[i] > targetRgb[i]) {
+            rgb[i]--;
+        }
+    }
+    writeRGB(rgb[0], rgb[1], rgb[2]);
+}
+
 void RGBLED::writeHSV(int H, int S, int V) {
     hsv[0] = H;
     hsv[1] = S;
     hsv[2] = V;
     int R = 0, G = 0, B = 0;
-    float MAX = V;
-    float MIN = MAX - (((float)S / 255) * MAX);
-    if (H < 60) {
+    int MAX = V;
+    int MIN = MAX - (((float)S / 255) * MAX);
+    if (H > 360) {
+        H -= 360;
+    }
+    if (H <= 60) {
         R = MAX;
         G = ((float)H / 60) * (MAX - MIN) + MIN;
         B = MIN;
-    } else if (H < 120) {
+    } else if (H <= 120) {
         R = (((float)120 - H) / 60) * (MAX - MIN) + MIN;
         G = MAX;
         B = MIN;
-    } else if (H < 180) {
+    } else if (H <= 180) {
         R = MIN;
         G = MAX;
         B = ((float)(H - 120) / 60) * (MAX - MIN) + MIN;
-    } else if (H < 240) {
+    } else if (H <= 240) {
         R = MIN;
         G = ((float)(240 - H) / 60) * (MAX - MIN) + MIN;
         B = MAX;
-    } else if (H < 300) {
+    } else if (H <= 300) {
         R = ((float)(H - 240) / 60) * (MAX - MIN) + MIN;
         G = MIN;
         B = MAX;
-    } else if (H < 360) {
+    } else if (H <= 360) {
         R = MAX;
         G = MIN;
         B = ((float)(360 - H) / 60) * (MAX - MIN) + MIN;
     }
     this->writeRGB(R, G, B);
+}
+
+void RGBLED::setHSV(int H, int S, int V) {
+    targetHsv[0] = H;
+    targetHsv[1] = S;
+    targetHsv[2] = V;
+}
+
+void RGBLED::fadeHSV() {
+    for (int i = 0; i < 3; i++) {
+        if (hsv[i] < targetHsv[i]) {
+            hsv[i]++;
+        } else if (hsv[i] > targetHsv[i]) {
+            hsv[i]--;
+        }
+    }
+    writeHSV(hsv[0], hsv[1], hsv[2]);
+    printf("%d\n", hsv[0]);
 }

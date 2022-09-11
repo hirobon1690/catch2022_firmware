@@ -39,6 +39,11 @@ float servo_angle;
 int stepper_state;
 int pump_state;
 int emergency;
+struct {
+    short hue;
+    unsigned char saturation;
+    unsigned char brightness;
+} led_hsv;
 
 int stepCnt = 0;
 int stepCycle = 6000;
@@ -53,6 +58,7 @@ const int stpPeriod = 50;
 
 Ticker ticker0;
 Ticker ticker1;
+Ticker ticker2;
 
 gpio stp(Pe2A, OUTPUT);
 gpio slp(E04, OUTPUT);
@@ -78,6 +84,10 @@ float unpackFloat(char* buf, int index) {
 
 int unpackInt(char* buf, int index) {
     return *(buf + index);
+}
+
+short unpackShort(char* buf, int index) {
+    return *(short*)(buf + index);
 }
 
 void receiveTwai(void* pvParameters) {
@@ -226,13 +236,16 @@ void initSensor() {
 void calPID() {
 }
 
+void fadeLed() {
+    led.fadeHSV();
+}
+
 void stripLed(void* pvParameters) {
     while (1) {
-        for (int deg = 0; deg < 360; deg++) {
-            led.writeHSV(deg, 255, 255);
-            printf("%d\n", deg);
-            delay_ms(10);
-        }
+        led.setHSV(0, 255, 255);
+        delay_ms(1000);
+        led.setHSV(360, 255, 255);
+        delay_ms(1000);
     }
 }
 
@@ -245,11 +258,29 @@ int measure() {
 
 void app_main() {
     init();
-    bu.buzz(2);
+    // bu.buzz(2);
     // initSensor();
     slp.write(1);
     disableCore0WDT();
     ticker0.attach_us(stpPeriod, step);
+    ticker2.attach_ms(5, fadeLed);
+    led.writeRGB(255, 255, 255);
+    while (1) {
+        char color[16];
+        uart.read(color);
+        led.setHSV(atoi(color), 255, 255);
+        // for(int i=0;i<360;i++){
+        //     led.writeHSV(0,255,255);
+        //     // led.setHSV(0,255,255);
+        //     delay_ms(5000);
+        //     // led.setHSV(245,255,255);
+        //     delay_ms(5000);
+        // }
+        // led.setHSV(0,255,255);
+        delay_ms(10);
+        // led.setHSV(360,255,255);
+        // delay_ms(1000);
+    }
     // stepCycle=8000;
     // while (1) {
     //     delay_ms(10);
@@ -260,10 +291,9 @@ void app_main() {
     // xTaskCreatePinnedToCore(receiveTwai, "receiveTwai", 4096, NULL, 22, &taskHandle, 0);
     // xTaskCreatePinnedToCore(stepToTarget, "stepToTarget", 4096, NULL, 22, &taskHandle, 1);
     // xTaskCreatePinnedToCore(stepAc, "stepAc", 4096, NULL, 22, &taskHandle, 0);
-    xTaskCreatePinnedToCore(stripLed, "stripLed", 4096, NULL, 22, &taskHandle, 0);
     ticker1.attach_ms(1, stepAcc);
-
     // xTaskCreatePinnedToCore(printStep, "printStep", 4096, NULL, 21, &taskHandle, 0);
+    
     // setSpeed(3000, 1000);
     stepCycle = minSpeed;
     dir.write(1);
@@ -296,6 +326,11 @@ void app_main() {
         setStep(target - currentStep);
         // setStep(atoi(buf));  //260 // 350ステップ 20
         printf("Step state is %d\n", msg.data[4]);
+
+        led_hsv.hue = unpackShort((char*)(msg.data), 5);
+        led_hsv.saturation = (unsigned char)msg.data[6];
+        led_hsv.brightness = (unsigned char)msg.data[7];
+        led.setHSV(led_hsv.hue, led_hsv.saturation, led_hsv.brightness);
         unsigned char twai_tx[1] = {0};
         twai_tx[0] = (unsigned char)measure();
         twai.write(0x00, twai_tx, 1);
