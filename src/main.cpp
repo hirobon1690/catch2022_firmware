@@ -259,28 +259,28 @@ int measure() {
 void app_main() {
     init();
     // bu.buzz(2);
-    // initSensor();
+    initSensor();
     slp.write(1);
     disableCore0WDT();
     ticker0.attach_us(stpPeriod, step);
     ticker2.attach_ms(5, fadeLed);
-    led.writeRGB(255, 255, 255);
-    while (1) {
-        char color[16];
-        uart.read(color);
-        led.setHSV(atoi(color), 255, 255);
-        // for(int i=0;i<360;i++){
-        //     led.writeHSV(0,255,255);
-        //     // led.setHSV(0,255,255);
-        //     delay_ms(5000);
-        //     // led.setHSV(245,255,255);
-        //     delay_ms(5000);
-        // }
-        // led.setHSV(0,255,255);
-        delay_ms(10);
-        // led.setHSV(360,255,255);
-        // delay_ms(1000);
-    }
+    // led.writeRGB(255, 255, 255);
+    // while (1) {
+    //     char color[16];
+    //     uart.read(color);
+    //     led.setHSV(atoi(color), 255, 255);
+    //     // for(int i=0;i<360;i++){
+    //     //     led.writeHSV(0,255,255);
+    //     //     // led.setHSV(0,255,255);
+    //     //     delay_ms(5000);
+    //     //     // led.setHSV(245,255,255);
+    //     //     delay_ms(5000);
+    //     // }
+    //     // led.setHSV(0,255,255);
+    //     delay_ms(10);
+    //     // led.setHSV(360,255,255);
+    //     // delay_ms(1000);
+    // }
     // stepCycle=8000;
     // while (1) {
     //     delay_ms(10);

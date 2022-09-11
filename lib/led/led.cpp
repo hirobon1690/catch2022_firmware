@@ -117,5 +117,5 @@ void RGBLED::fadeHSV() {
         }
     }
     writeHSV(hsv[0], hsv[1], hsv[2]);
-    printf("%d\n", hsv[0]);
+    // printf("%d\n", hsv[0]);
 }
