@@ -30,10 +30,6 @@ gpio::gpio(PinName _pin, PinMode _mode) {
     }
 }
 
-gpio::gpio(){
-    
-}
-
 void gpio::write(bool val) {
     state = val;
     switch (device) {
