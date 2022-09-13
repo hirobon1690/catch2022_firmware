@@ -53,7 +53,7 @@ int currentStep = 0;
 const int minSpeed = 6000;
 const int acceralationLimit = 400;
 
-const int DIST = 70;
+const int DIST = 75;
 const int stpPeriod = 50;
 
 Ticker ticker0;
@@ -261,38 +261,10 @@ void app_main() {
     slp.write(1);
     disableCore0WDT();
     ticker0.attach_us(stpPeriod, step);
-    // ticker2.attach_ms(5, fadeLed);
-    // led.writeRGB(255, 255, 255);
-    // while (1) {
-    //     char color[16];
-    //     uart.read(color);
-    //     led.setHSV(atoi(color), 255, 255);
-    //     // for(int i=0;i<360;i++){
-    //     //     led.writeHSV(0,255,255);
-    //     //     // led.setHSV(0,255,255);
-    //     //     delay_ms(5000);
-    //     //     // led.setHSV(245,255,255);
-    //     //     delay_ms(5000);
-    //     // }
-    //     // led.setHSV(0,255,255);
-    //     delay_ms(10);
-    //     // led.setHSV(360,255,255);
-    //     // delay_ms(1000);
-    // }
-    // stepCycle=8000;
-    // while (1) {
-    //     delay_ms(10);
-    // }
     homeStp();
-
-    // ticker1.attach_ms(pidPeriod,calA1PID);
-    // xTaskCreatePinnedToCore(receiveTwai, "receiveTwai", 4096, NULL, 22, &taskHandle, 0);
     xTaskCreatePinnedToCore(stripLed, "ledTask", 4096, NULL, 22, &taskHandle, 1);
-    // xTaskCreatePinnedToCore(stepAc, "stepAc", 4096, NULL, 22, &taskHandle, 0);
     ticker1.attach_ms(1, stepAcc);
-    // xTaskCreatePinnedToCore(printStep, "printStep", 4096, NULL, 21, &taskHandle, 0);
     
-    // setSpeed(3000, 1000);
     stepCycle = minSpeed;
     dir.write(1);
     char buf[16];
@@ -307,23 +279,26 @@ void app_main() {
         servo0.write(angle);
         switch (msg.data[4]) {
             case 0:
-                target = 0;
+                target = 20;
                 break;
             case 1:
-                target = 260;
+                target = 270;
                 break;
             case 2:
                 target = 350;
                 break;
             case 3:
-                target = 20;
+                target = 190;
+                break;
+            case 4:
+                target= 270;
                 break;
             default:
                 break;
         }
         setStep(target - currentStep);
         // setStep(atoi(buf));  //260 // 350ステップ 20
-        printf("Step state is %d\n", msg.data[4]);
+        // printf("Step state is %d\n", msg.data[4]);
 
         led_hsv.hue = unpackShort((char*)(msg.data), 5);
         led_hsv.saturation = (unsigned char)msg.data[7];
@@ -334,6 +309,6 @@ void app_main() {
         twai_tx[0] = (unsigned char)measure();
         twai.write(0x00, twai_tx, 1);
         printf("%d, %d, %d\n", led_hsv.hue,led_hsv.saturation,led_hsv.brightness);
-        delay_ms(10);
+        delay_ms(1);
     }
 }

@@ -11,5 +11,6 @@ class servo{
     private:
     const int max=508;
     const int min=104;
+    float angle;
 
 };
