@@ -52,6 +52,7 @@ int steps = 0;
 int currentStep = 0;
 const int minSpeed = 6000;
 const int acceralationLimit = 400;
+bool start = false;
 
 const int DIST = 75;
 const int stpPeriod = 50;
@@ -256,22 +257,25 @@ int measure() {
 
 void app_main() {
     init();
-    // bu.buzz(2);
     initSensor();
+    twai_message_t msg;
+    twai.read(&msg);
+    ex.set();
+    // bu.buzz(2);
     slp.write(1);
     disableCore0WDT();
     ticker0.attach_us(stpPeriod, step);
     homeStp();
     xTaskCreatePinnedToCore(stripLed, "ledTask", 4096, NULL, 22, &taskHandle, 1);
     ticker1.attach_ms(1, stepAcc);
-    
+
     stepCycle = minSpeed;
     dir.write(1);
     char buf[16];
     setStep(100);
     delay_ms(50);
     while (1) {
-        printf("Enter Step\n");
+        // printf("Enter Step\n");
         twai_message_t msg;
         twai.read(&msg);
         int target = 0;
@@ -285,13 +289,13 @@ void app_main() {
                 target = 270;
                 break;
             case 2:
-                target = 350;
+                target = 360;
                 break;
             case 3:
                 target = 190;
                 break;
             case 4:
-                target= 270;
+                target = 270;
                 break;
             default:
                 break;
@@ -308,7 +312,7 @@ void app_main() {
         unsigned char twai_tx[1] = {0};
         twai_tx[0] = (unsigned char)measure();
         twai.write(0x00, twai_tx, 1);
-        printf("%d, %d, %d\n", led_hsv.hue,led_hsv.saturation,led_hsv.brightness);
+        // printf("%d, %d, %d\n", led_hsv.hue,led_hsv.saturation,led_hsv.brightness);
         delay_ms(1);
     }
 }
