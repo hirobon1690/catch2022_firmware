@@ -69,7 +69,7 @@ gpio s10(Pe2C, INPUT_PU);
 gpio s11(Pe2D, INPUT_PU);
 gpio user(USER, INPUT_PU);
 VL53L0X tof[2];
-gpio sensor[2] = {gpio(Pe1A, OUTPUT), gpio(Pe1C, OUTPUT)};
+gpio sensor[2] = {gpio(E01, OUTPUT), gpio(E02, OUTPUT)};
 
 RGBLED led(Pe0A, Pe0B, Pe0C);
 buzzer bu(Pe0D);
@@ -258,6 +258,10 @@ int measure() {
 void app_main() {
     init();
     initSensor();
+    while(1){
+        printf("%d\n",measure());
+        delay_ms(100);
+    }
     twai_message_t msg;
     twai.read(&msg);
     ex.set();
