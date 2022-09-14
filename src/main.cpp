@@ -257,13 +257,12 @@ int measure() {
 
 void app_main() {
     init();
+    gpio userLed(LED, OUTPUT);
+    userLed.write(1);
     initSensor();
-    while(1){
-        printf("%d\n",measure());
-        delay_ms(100);
-    }
     twai_message_t msg;
     twai.read(&msg);
+    userLed.write(0);
     ex.set();
     // bu.buzz(2);
     slp.write(1);
@@ -280,6 +279,7 @@ void app_main() {
     delay_ms(50);
     while (1) {
         // printf("Enter Step\n");
+        userLed.write(1);
         twai_message_t msg;
         twai.read(&msg);
         int target = 0;
@@ -300,6 +300,10 @@ void app_main() {
                 break;
             case 4:
                 target = 270;
+                break;
+            case 8:
+                homeStp();
+                target = 20;
                 break;
             default:
                 break;
