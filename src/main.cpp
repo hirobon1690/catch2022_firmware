@@ -20,6 +20,8 @@
 #include "twai.h"
 #include "uart.h"
 
+gpio led(LED,OUTPUT);
+
 extern "C" {
 void app_main(void);
 }
@@ -27,4 +29,9 @@ void app_main(void);
 TaskHandle_t taskHandle;
 
 void app_main() {
+    led.write(1);
+    while(1){
+        led.flip();
+        delay_ms(500);
+    }
 }
