@@ -48,8 +48,8 @@ struct {
     unsigned char brightness = 0;
 } led_hsv;
 
-motor m0(Pe1A, MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM0A, E01, E04);
-motor m1(Pe1B, MCPWM_UNIT_1, MCPWM_TIMER_1, MCPWM1A, E03, E02);
+motor m0(Pe1A, MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM0A, E04, E01);
+motor m1(Pe1B, MCPWM_UNIT_1, MCPWM_TIMER_1, MCPWM1A, E02, E03);
 gpio s00(Pe1C, INPUT_PU);
 gpio s01(Pe1D, INPUT_PU);
 gpio s10(Pe2A, INPUT_PU);
@@ -57,12 +57,12 @@ gpio s11(Pe2B, INPUT_PU);
 gpio user(USER, INPUT_PU);
 gpio pmp[2] = {gpio(Pe0A, OUTPUT), gpio(Pe0B, OUTPUT)};
 gpio vlv[2] = {gpio(Pe0C, OUTPUT), gpio(Pe0D, OUTPUT)};
-adc pot0(A3);
-adc pot1(A2);
+adc pot0(A1);
+adc pot1(A0);
 arm a0(m0, s00, s01, pot0, 250);
 arm a1(m1, s10, s11, pot1, 276);
-KRA_PID pid0((float)pidPeriod / 1000, 0, 250, 0, 30, 0.4);
-KRA_PID pid1((float)pidPeriod / 1000, 0, 276, 0, 30, 0.4);
+KRA_PID pid0((float)pidPeriod / 1000, 0, 250, 0, 35, 1.2);
+KRA_PID pid1((float)pidPeriod / 1000, 0, 276, 0, 35, 1.2);
 
 Ticker ticker0;
 Ticker ticker1;
@@ -137,9 +137,9 @@ void sendTwai(void* pvParameters) {
         twai_msg_tx[5] = hsv[0];
         twai_msg_tx[6] = hsv[1];
         twai_msg_tx[7] = hsv[2];
-        twai_msg_tx[8] = hsv[3];
+        // twai_msg_tx[8] = hsv[3];
         twai.write(0x00, twai_msg_tx, 8);
-        delay_ms(10);
+        delay_ms(5);
     }
 }
 
@@ -149,13 +149,18 @@ void receiveTwai(void* pvParameters) {
         twai.read(&msg);
         is_grabbed = msg.data[0];
         // printf("%d\n",is_grabbed);
-        delay_ms(10);
+        delay_ms(1);
     }
 }
 
 void calPID() {
-    currentDeg[0] = pot0.read();
-    currentDeg[1] = pot1.read();
+    newDeg[0] = pot0.read();
+    newDeg[1] = pot1.read();
+    for (int i = 0; i < 2; i++) {
+        if (abs(currentDeg[i] - newDeg[i]) < 50) {
+            currentDeg[i] = newDeg[i];
+        }
+    }
 #ifdef DEBUG
     printf("%3d, %3d, %d, %d, %f, %f\n", a0.calDeg(currentDeg[0]), a1.calDeg(currentDeg[1]), currentDeg[0], currentDeg[1], m0.duty, m1.duty);
 #endif
@@ -180,21 +185,9 @@ void app_main() {
     // disableCore0WDT();
     // disableCore1WDT();
     init();
-    while (1) {
-        for (int i = 0; i < 10; i++) {
-            m0.write(-i);
-            m1.write(-i);
-            delay_ms(50);
-        }
-        for (int i = 10; i > 0; i--) {
-            m0.write(-i);
-            m1.write(-i);
-            delay_ms(50);
-        }
-    }
-
     turnPmp(0);
-    // m0.write(-100);
+    m0.write(0);
+    m1.write(0);
     while (1) {
         int a = pot0.read();
         int b = pot1.read();
@@ -208,10 +201,10 @@ void app_main() {
     }
     currentDeg[0] = pot0.read();
     currentDeg[1] = pot1.read();
-    pid0.setgain(6, 0, 0);
-    pid1.setgain(6, 0, 0);
+    pid0.setgain(8, 0.8, 0);
+    pid1.setgain(8, 0.8, 0);
     a0.home(0, 1468, 126);
-    a1.home(0, 98, 1255);
+    a1.home(0, 91, 1271);
     pid0.setgoal(a0.calDeg(currentDeg[0]));
     pid1.setgoal(a1.calDeg(currentDeg[1]));
     ticker0.attach_ms(pidPeriod, calPID);
