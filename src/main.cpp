@@ -290,10 +290,10 @@ void app_main() {
                 target = 20;
                 break;
             case 1:
-                target = 270;
+                target = 290;
                 break;
             case 2:
-                target = 360;
+                target = 355;
                 break;
             case 3:
                 target = 190;
