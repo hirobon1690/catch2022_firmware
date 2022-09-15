@@ -69,7 +69,7 @@ gpio s10(Pe2C, INPUT_PU);
 gpio s11(Pe2D, INPUT_PU);
 gpio user(USER, INPUT_PU);
 VL53L0X tof[2];
-gpio sensor[2] = {gpio(E01, OUTPUT), gpio(E02, OUTPUT)};
+gpio sensor[2] = {gpio(Pe1A, OUTPUT), gpio(Pe1C, OUTPUT)};
 
 RGBLED led(Pe0A, Pe0B, Pe0C);
 buzzer bu(Pe0D);
@@ -259,10 +259,10 @@ void app_main() {
     init();
     gpio userLed(LED, OUTPUT);
     userLed.write(1);
-    initSensor();
     twai_message_t msg;
     twai.read(&msg);
     userLed.write(0);
+    initSensor();
     ex.set();
     // bu.buzz(2);
     slp.write(1);
@@ -278,7 +278,7 @@ void app_main() {
     setStep(100);
     delay_ms(50);
     while (1) {
-        // printf("Enter Step\n");
+        printf("Enter Step\n");
         userLed.write(1);
         twai_message_t msg;
         twai.read(&msg);
@@ -302,7 +302,9 @@ void app_main() {
                 target = 270;
                 break;
             case 8:
+                ticker1.detach();
                 homeStp();
+                ticker1.attach_ms(1,stepAcc);
                 target = 20;
                 break;
             default:
@@ -310,7 +312,7 @@ void app_main() {
         }
         setStep(target - currentStep);
         // setStep(atoi(buf));  //260 // 350ステップ 20
-        // printf("Step state is %d\n", msg.data[4]);
+        printf("Step state is %d\n", msg.data[4]);
 
         led_hsv.hue = unpackShort((char*)(msg.data), 5);
         led_hsv.saturation = (unsigned char)msg.data[7];
