@@ -73,6 +73,7 @@ const PinName Pe2B=P19;
 const PinName Pe2C=P26;
 const PinName Pe2D=P27;
 const PinName USER=P2;
+const PinName LED=P32;
 
 enum PinMode{
     OUTPUT,
