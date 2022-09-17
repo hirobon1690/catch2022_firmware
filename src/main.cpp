@@ -325,14 +325,15 @@ void app_main() {
         printf("Step state is %d\n", msg.data[4]);
 
         led_hsv.hue = unpackShort((char*)(msg.data), 5);
-        led_hsv.saturation = (unsigned char)msg.data[7];
+        // led_hsv.saturation = (unsigned char)msg.data[7];
+        led_hsv.saturation = 255;
         // led_hsv.brightness = (unsigned char)msg.data[8];
         led_hsv.brightness = 255;
         led.setHSV(led_hsv.hue, led_hsv.saturation, led_hsv.brightness);
         unsigned char twai_tx[1] = {0};
         twai_tx[0] = (unsigned char)measure();
         twai.write(0x00, twai_tx, 1);
-        // printf("%d, %d, %d\n", led_hsv.hue,led_hsv.saturation,led_hsv.brightness);
+        printf("%d, %d, %d\n", led_hsv.hue,led_hsv.saturation,led_hsv.brightness);
         delay_ms(1);
     }
 }
