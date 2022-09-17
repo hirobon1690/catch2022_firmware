@@ -50,7 +50,7 @@ int stepCycle = 4000;
 int targetSpeed = 0;
 int steps = 0;
 int currentStep = 0;
-const int minSpeed = 4000;
+const int minSpeed = 3400;
 const int acceralationLimit = 400;
 bool start = false;
 bool homeFlag=false;
@@ -151,7 +151,7 @@ void stepAcc() {
         limit = acceralationLimit;
     }
     if (steps < limit) {
-        stepCycle -= 4;
+        stepCycle -= 8;
     } else if (steps >= targetStep) {
         stepCycle = 0;
     } else if (steps > targetStep - limit) {
@@ -211,7 +211,7 @@ void homeStp() {
     // }
     stepCycle = minSpeed;
     dir.write(0);
-    stepCycle = 5000;
+    stepCycle = 4500;
     while (1) {
         if (!s10.read()) {
             break;
@@ -293,7 +293,7 @@ void app_main() {
                 break;
             case 1:
                 homeFlag=false;
-                target = 280;
+                target = 240;
                 break;
             case 2:
                 homeFlag=false;
