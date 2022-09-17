@@ -53,6 +53,7 @@ int currentStep = 0;
 const int minSpeed = 6000;
 const int acceralationLimit = 400;
 bool start = false;
+bool homeFlag=false;
 
 const int DIST = 75;
 const int stpPeriod = 50;
@@ -200,14 +201,14 @@ void setStep(int step) {
 }
 
 void homeStp() {
-    dir.write(1);
-    stepCycle = 5000;
-    while (1) {
-        if (!s11.read()) {
-            break;
-        }
-        delay_ms(1);
-    }
+    // dir.write(1);
+    // stepCycle = 5000;
+    // while (1) {
+    //     if (!s11.read()) {
+    //         break;
+    //     }
+    //     delay_ms(1);
+    // }
     stepCycle = minSpeed;
     dir.write(0);
     stepCycle = 5000;
@@ -287,27 +288,36 @@ void app_main() {
         servo0.write(angle);
         switch (msg.data[4]) {
             case 0:
+                homeFlag=false;
                 target = 20;
                 break;
             case 1:
-                target = 290;
+                homeFlag=false;
+                target = 280;
                 break;
             case 2:
+                homeFlag=false;
                 target = 355;
                 break;
             case 3:
+                homeFlag=false;
                 target = 190;
                 break;
             case 4:
+                homeFlag=false;
                 target = 270;
                 break;
             case 8:
-                ticker1.detach();
-                homeStp();
-                ticker1.attach_ms(1,stepAcc);
-                target = 20;
+                if(!homeFlag){
+                    ticker1.detach();
+                    homeStp();
+                    ticker1.attach_ms(1,stepAcc);
+                    target = 20;
+                    homeFlag=true;
+                }
                 break;
             default:
+                homeFlag=false;
                 break;
         }
         setStep(target - currentStep);
