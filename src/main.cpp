@@ -1,4 +1,4 @@
-// #define DEBUG
+#define DEBUG
 
 #include <driver/gpio.h>
 #include <driver/i2c.h>
@@ -42,12 +42,13 @@ int preDeg[2] = {0, 0};
 int newDeg[2] = {0, 0};
 char is_grabbed = 0;
 const int pidPeriod = 10;
-int ledPeriod=500;
+int ledPeriod = 500;
 struct {
     short hue = 0;
     unsigned char saturation = 0;
     unsigned char brightness = 0;
 } led_hsv;
+int result[2][10] = {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
 
 motor m0(Pe1A, MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM0A, E04, E01);
 motor m1(Pe1B, MCPWM_UNIT_1, MCPWM_TIMER_1, MCPWM1A, E02, E03);
@@ -58,13 +59,13 @@ gpio s11(Pe2B, INPUT_PU);
 gpio user(USER, INPUT_PU);
 gpio pmp[2] = {gpio(Pe0A, OUTPUT), gpio(Pe0B, OUTPUT)};
 gpio vlv[2] = {gpio(Pe0C, OUTPUT), gpio(Pe0D, OUTPUT)};
-gpio userLed(LED,OUTPUT);
+gpio userLed(LED, OUTPUT);
 adc pot0(A1);
 adc pot1(A0);
 arm a0(m0, s00, s01, pot0, 250);
 arm a1(m1, s10, s11, pot1, 276);
-KRA_PID pid0((float)pidPeriod / 1000, 0, 250, 0, 35, 0.8);
-KRA_PID pid1((float)pidPeriod / 1000, 0, 276, 0, 35, 0.8);
+KRA_PID pid0((float)pidPeriod / 1000, 0, 250, 0, 35, 1.2);
+KRA_PID pid1((float)pidPeriod / 1000, 0, 276, 0, 35, 1.2);
 
 Ticker ticker0;
 Ticker ticker1;
@@ -112,16 +113,16 @@ void receiveUart(void* pvParameters) {
         }
         // printf("%d\n",is_grabbed);
         move_cmd[0] = unpackFloat(uart_msg, 0);
-        if(move_cmd[0]<0){
-            move_cmd[0]=0;
-        }else if(move_cmd[0]>250){
-            move_cmd[0]=250;
+        if (move_cmd[0] < 0) {
+            move_cmd[0] = 0;
+        } else if (move_cmd[0] > 250) {
+            move_cmd[0] = 250;
         }
         move_cmd[1] = unpackFloat(uart_msg, 4);
-        if(move_cmd[0]<0){
-            move_cmd[0]=0;
-        }else if(move_cmd[0]>276){
-            move_cmd[0]=276;
+        if (move_cmd[0] < 0) {
+            move_cmd[0] = 0;
+        } else if (move_cmd[0] > 276) {
+            move_cmd[0] = 276;
         }
         pid0.setgoal(move_cmd[0]);
         pid1.setgoal(move_cmd[1]);
@@ -165,13 +166,13 @@ void receiveTwai(void* pvParameters) {
     }
 }
 
-void flip(void* pvParameters){
+void flip(void* pvParameters) {
     userLed.write(1);
-    while(1){
-        if(ledPeriod==0){
+    while (1) {
+        if (ledPeriod == 0) {
             userLed.write(1);
             delay_ms(10);
-        }else{
+        } else {
             userLed.flip();
             delay_ms(ledPeriod);
         }
@@ -182,10 +183,19 @@ void calPID() {
     newDeg[0] = pot0.read();
     newDeg[1] = pot1.read();
     for (int i = 0; i < 2; i++) {
-        if (abs(currentDeg[i] - newDeg[i]) < 60) {
+        if (abs(preDeg[i] - newDeg[i]) < 60) {
             currentDeg[i] = newDeg[i];
         }
     }
+    for (int i = 0; i < 2; i++) {
+        result[i][0] = result[i][1];
+        result[i][1] = result[i][2];
+        result[i][2] = result[i][3];
+        result[i][3] = result[i][4];
+        result[i][4] = currentDeg[i];
+        currentDeg[i] = (float)(result[i][0] + result[i][1] + result[i][2] + result[i][3] + result[i][4]) / 5.0 + 0.5;
+    }
+
 #ifdef DEBUG
     printf("%3d, %3d, %d, %d, %f, %f\n", a0.calDeg(currentDeg[0]), a1.calDeg(currentDeg[1]), currentDeg[0], currentDeg[1], m0.duty, m1.duty);
 #endif
@@ -202,6 +212,8 @@ void calPID() {
     } else {
         m1.write(duty[1]);
     }
+    preDeg[0] = currentDeg[0];
+    preDeg[1] = currentDeg[1];
 }
 
 int rawData[2] = {0, 0};
@@ -227,7 +239,7 @@ void app_main() {
     }
 #else
     char start_msg[4];
-    ledPeriod=500;
+    ledPeriod = 500;
     while (1) {
         int a = pot0.read();
         int b = pot1.read();
@@ -237,9 +249,9 @@ void app_main() {
             break;
         }
     }
-    unsigned char twai_msg_tx[8]={0,0,0,0,0,0,0,0};
+    unsigned char twai_msg_tx[8] = {0, 0, 0, 0, 0, 0, 0, 0};
     twai.write(0x00, twai_msg_tx, 8);
-    ledPeriod=200;
+    ledPeriod = 200;
     for (int i = 0; i < 4; i++) {
         start_msg[i] = 0;
     }
@@ -253,13 +265,15 @@ void app_main() {
         }
     }
 #endif
-    ledPeriod=0;
+    ledPeriod = 0;
     currentDeg[0] = pot0.read();
     currentDeg[1] = pot1.read();
-    pid0.setgain(7, 1.5, 0.5);
-    pid1.setgain(7, 1.5, 0.5);
-    a0.home(0, 1395, 71);
-    a1.home(0, 125, 1310);
+    preDeg[0] = currentDeg[0];
+    preDeg[1] = currentDeg[1];
+    pid0.setgain(7, 0, 0);
+    pid1.setgain(6, 0, 0);
+    a0.home(0, 1438, 109);
+    a1.home(0, 102, 1261);
     pid0.setgoal(a0.calDeg(currentDeg[0]));
     pid1.setgoal(a1.calDeg(currentDeg[1]));
     ticker0.attach_ms(pidPeriod, calPID);
