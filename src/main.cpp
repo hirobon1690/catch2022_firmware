@@ -53,7 +53,7 @@ int currentStep = 0;
 const int minSpeed = 4000;
 const int acceralationLimit = 400;
 bool start = false;
-bool homeFlag=false;
+bool homeFlag = false;
 
 const int DIST = 75;
 const int stpPeriod = 50;
@@ -288,36 +288,40 @@ void app_main() {
         servo0.write(angle);
         switch (msg.data[4]) {
             case 0:
-                homeFlag=false;
+                homeFlag = false;
                 target = 20;
                 break;
             case 1:
-                homeFlag=false;
+                homeFlag = false;
                 target = 280;
                 break;
             case 2:
-                homeFlag=false;
+                homeFlag = false;
                 target = 355;
                 break;
             case 3:
-                homeFlag=false;
+                homeFlag = false;
                 target = 190;
                 break;
             case 4:
-                homeFlag=false;
+                homeFlag = false;
                 target = 270;
                 break;
+            case 5:
+                homeFlag=false;
+                target = 257;
+                break;
             case 8:
-                if(!homeFlag){
+                if (!homeFlag) {
                     ticker1.detach();
                     homeStp();
-                    ticker1.attach_ms(1,stepAcc);
+                    ticker1.attach_ms(1, stepAcc);
                     target = 20;
-                    homeFlag=true;
+                    homeFlag = true;
                 }
                 break;
             default:
-                homeFlag=false;
+                homeFlag = false;
                 break;
         }
         setStep(target - currentStep);
