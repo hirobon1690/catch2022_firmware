@@ -30,8 +30,8 @@ void app_main() {
     delay_ms(10);
     i2c.init();
     ex.set();
-    adc pin0(A2);
-    adc pin1(A3);
+    adc pin0(A0);
+    adc pin1(A1);
     int result[2]={0,0};
 
     printf("init\n");
