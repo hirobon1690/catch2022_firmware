@@ -46,11 +46,11 @@ struct {
 } led_hsv;
 
 int stepCnt = 0;
-int stepCycle = 6000;
+int stepCycle = 4000;
 int targetSpeed = 0;
 int steps = 0;
 int currentStep = 0;
-const int minSpeed = 6000;
+const int minSpeed = 4000;
 const int acceralationLimit = 400;
 bool start = false;
 bool homeFlag=false;
@@ -151,11 +151,11 @@ void stepAcc() {
         limit = acceralationLimit;
     }
     if (steps < limit) {
-        stepCycle -= 2;
+        stepCycle -= 4;
     } else if (steps >= targetStep) {
         stepCycle = 0;
     } else if (steps > targetStep - limit) {
-        stepCycle += 4;
+        stepCycle += 8;
     }
     // if (targetSpeed == 0) {
     //     stepCycle = minSpeed;
