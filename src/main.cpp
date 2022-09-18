@@ -293,7 +293,7 @@ void app_main() {
                 break;
             case 1:
                 homeFlag=false;
-                target = 240;
+                target = 230;
                 break;
             case 2:
                 homeFlag = false;
