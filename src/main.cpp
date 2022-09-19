@@ -1,4 +1,4 @@
-#define DEBUG
+// #define DEBUG
 
 #include <driver/gpio.h>
 #include <driver/i2c.h>
