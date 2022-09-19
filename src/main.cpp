@@ -185,17 +185,9 @@ void calPID() {
     for (int i = 0; i < 2; i++) {
         if (abs(preDeg[i] - newDeg[i]) < 60) {
             currentDeg[i] = newDeg[i];
+            // a = newDeg[i];
         }
     }
-    for (int i = 0; i < 2; i++) {
-        result[i][0] = result[i][1];
-        result[i][1] = result[i][2];
-        result[i][2] = result[i][3];
-        result[i][3] = result[i][4];
-        result[i][4] = currentDeg[i];
-        currentDeg[i] = (float)(result[i][0] + result[i][1] + result[i][2] + result[i][3] + result[i][4]) / 5.0 + 0.5;
-    }
-
 #ifdef DEBUG
     printf("%3d, %3d, %d, %d, %f, %f\n", a0.calDeg(currentDeg[0]), a1.calDeg(currentDeg[1]), currentDeg[0], currentDeg[1], m0.duty, m1.duty);
 #endif
@@ -236,6 +228,8 @@ void app_main() {
             break;
         }
         delay_ms(5);
+        preDeg[0] = a;
+        preDeg[1] = b;
     }
 #else
     char start_msg[4];
@@ -268,12 +262,12 @@ void app_main() {
     ledPeriod = 0;
     currentDeg[0] = pot0.read();
     currentDeg[1] = pot1.read();
-    preDeg[0] = currentDeg[0];
-    preDeg[1] = currentDeg[1];
+    // preDeg[0] = currentDeg[0];
+    // preDeg[1] = currentDeg[1];
     pid0.setgain(7, 0, 0);
     pid1.setgain(6, 0, 0);
-    a0.home(0, 1438, 109);
-    a1.home(0, 102, 1261);
+    a0.home(0, 1433, 99);
+    a1.home(0, 214, 1413);
     pid0.setgoal(a0.calDeg(currentDeg[0]));
     pid1.setgoal(a1.calDeg(currentDeg[1]));
     ticker0.attach_ms(pidPeriod, calPID);
