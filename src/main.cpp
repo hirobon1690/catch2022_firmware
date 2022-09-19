@@ -266,8 +266,8 @@ void app_main() {
     // preDeg[1] = currentDeg[1];
     pid0.setgain(7, 0, 0);
     pid1.setgain(6, 0, 0);
-    a0.home(0, 1433, 99);
-    a1.home(0, 214, 1413);
+    a0.home(0, 1426, 97);
+    a1.home(0, 98, 1267);
     pid0.setgoal(a0.calDeg(currentDeg[0]));
     pid1.setgoal(a1.calDeg(currentDeg[1]));
     ticker0.attach_ms(pidPeriod, calPID);
